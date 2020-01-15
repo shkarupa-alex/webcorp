@@ -12,7 +12,7 @@ class HabrSpider(scrapy.Spider):
     ]
 
     csv_dump_name = 'habr'
-    stop_post = 484018 - 10000  # 31.10.2019
+    stop_post = 484118  # 15.01.2020
     url_template = 'https://habr.com/ru/post/{}/'
 
     def __init__(self, *args, **kwargs):
