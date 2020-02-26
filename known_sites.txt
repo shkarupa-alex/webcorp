@@ -1,0 +1,43 @@
++ [custom] otvet.mail.ru
++ [custom] otzovik.com
++ [custom] https://irecommend.ru/
+
+- yandex.ru
+- google.ru
+- google.com
+- mail.ru, e.mail.ru
+- youtube.com
+? instagram.com
+? avito.ru
+- wikipedia.org
+? kinopoisk.ru
+- rambler.ru
+- gismeteo.ru
+- www.livejournal.com
+- zaycev.net
+- www.aliexpress.com
+- aliexpress.ru
+- 2gis.ru
+- twitter.com
+
+
++ habr.com
++ www.drive2.ru
++ www.livejournal.com
++ * livjournal users
++ lenta.ru
++ pikabu.ru
++ roem.ru
++ ria.ru
++ vc.ru
++ www.gazeta.ru
++ www.kommersant.ru
++ www.kp.ru
++ www.mk.ru
++ www.rbc.ru
++ www.sport-express.ru
++ zen.yandex.ru
++ www.lib.rus.ec / book.lib.rus.ec
+
++ 2ch.hk, 2ch.pm, 2ch.re, 2ch.tf, 2ch.wf, 2ch.yt, 2-ch.so
++ lurkmo.re • lurkmore.co • lurkmore.net • IPv6.lurkmo.re • IPv6.lurkmore.to

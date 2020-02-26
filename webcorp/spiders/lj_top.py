@@ -3,14 +3,15 @@ import scrapy
 
 
 class LjTopSpider(scrapy.Spider):
+    custom_settings = {
+        'FOLLOW_CANONICAL_LINKS': False,
+        'ROBOTSTXT_OBEY': False,
+    }
     name = 'lj_top'
     allowed_domains = ['www.livejournal.com']
     start_urls = [
         # 'https://www.livejournal.com/'
     ]
-    custom_settings = {
-        'ROBOTSTXT_OBEY': False
-    }
 
     csv_dump_name = 'livejournal_top'
 

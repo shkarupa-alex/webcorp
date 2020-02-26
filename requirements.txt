@@ -1,0 +1,7 @@
+beautifulsoup4>=4.8.2
+newspaper3k>=0.1.7
+python-slugify>=4.0.0
+scrapy>=1.8.0
+w3lib>=1.21.0
+stem>=1.8.0
+scrapy-rotating-proxies>=0.6.2

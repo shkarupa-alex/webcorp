@@ -84,11 +84,13 @@ class CsvPooledWriterTest(unittest.TestCase):
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
     def test_rotate(self):
-        c = CsvPooledWriter(pool_path=self.temp_dir, pool_size=2, file_size=5)
+        c = CsvPooledWriter(pool_path=self.temp_dir, pool_size=2, max_size=5)
         c.write('first', ['01234', '56789'])
         self.assertEqual(c.order, ['first'])
         self.assertEqual(list(c.files.keys()), ['first'])
         self.assertEqual(os.listdir(self.temp_dir), ['first-000000000.csv.gz'])
+        self.assertTrue(c.files['first'].curr_file.name.endswith('first-000000000.csv.gz'))
+        self.assertEqual(c.files['first'].curr_file.tell(), 46)
 
         c.write('second', ['01234', '56789'])
         self.assertEqual(c.order, ['first', 'second'])
@@ -101,12 +103,24 @@ class CsvPooledWriterTest(unittest.TestCase):
         self.assertEqual(os.listdir(self.temp_dir), [
             'first-000000000.csv.gz', 'second-000000000.csv.gz', 'first-000000001.csv.gz'
         ])
+        self.assertTrue(c.files['first'].curr_file.name.endswith('first-000000001.csv.gz'))
+        self.assertEqual(c.files['first'].curr_file.tell(), 46)
+
+        c.write('first', ['01234', '56789'])
+        self.assertEqual(c.order, ['second', 'first'])
+        self.assertEqual(list(c.files.keys()), ['first', 'second'])
+        self.assertEqual(os.listdir(self.temp_dir), [
+            'first-000000002.csv.gz', 'first-000000000.csv.gz', 'second-000000000.csv.gz', 'first-000000001.csv.gz'
+        ])
+        self.assertTrue(c.files['first'].curr_file.name.endswith('first-000000002.csv.gz'))
+        self.assertEqual(c.files['first'].curr_file.tell(), 46)
 
         c.write('third', ['01234', '56789'])
         self.assertEqual(c.order, ['first', 'third'])
         self.assertEqual(list(c.files.keys()), ['first', 'third'])
         self.assertEqual(os.listdir(self.temp_dir), [
-            'third-000000000.csv.gz', 'first-000000000.csv.gz', 'second-000000000.csv.gz', 'first-000000001.csv.gz'
+            'third-000000000.csv.gz', 'first-000000002.csv.gz', 'first-000000000.csv.gz', 'second-000000000.csv.gz',
+            'first-000000001.csv.gz'
         ])
 
 
@@ -118,7 +132,7 @@ class CsvJoinedReaderTest(unittest.TestCase):
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
     def test_join_compressed(self):
-        c = CsvPooledWriter(pool_path=self.temp_dir, pool_size=1, file_size=5)
+        c = CsvPooledWriter(pool_path=self.temp_dir, pool_size=1, max_size=5)
         c.write('test', ['01\n234', '56789'])
         self.assertEqual(os.listdir(self.temp_dir), ['test-000000000.csv.gz'])
 
@@ -130,8 +144,8 @@ class CsvJoinedReaderTest(unittest.TestCase):
         with csv_joined_reader(self.temp_dir, 'test') as reader:
             data = list(reader)
             self.assertEqual(data, [
-                ['01\n234', '56789'],
-                ['ab"c"de', 'fg\r\nhij']
+                ['e18ca2983cacd62bdd0fad83897c9283', '01\n234', '56789'],
+                ['0807aac421f0c290a53e6299a29f1c0e', 'ab"c"de', 'fg\r\nhij']
             ])
 
 

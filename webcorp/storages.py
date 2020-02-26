@@ -2,15 +2,34 @@
 import contextlib
 import csv
 import gzip
+import hashlib
 import io
 import itertools
 import os
 import re
 import sys
-import traceback
 
 
-class WriteSplitter(object):
+def hash_row(row):
+    content = ''.join([str(v) for v in row])
+
+    return hashlib.md5(content.encode('utf-8')).hexdigest()
+
+
+def check_row(row):
+    # Out of hash or values
+    if len(row) < 2:
+        return None
+
+    # First value is not a hash
+    hash_value = row[0]
+    if not isinstance(hash_value, str) or len(hash_value) != 32 or set(hash_value).difference('0123456789abcdef'):
+        return None
+
+    return hash_row(row[1:]) == hash_value
+
+
+class WriteSplitter:
     def __init__(self, file_path, file_name, file_ext, max_size=0, compress=True):
         """
         File-like object, that splits output to multiple files of a given size.
@@ -33,7 +52,8 @@ class WriteSplitter(object):
         self.close()
 
     def _next(self, force_next):
-        exist_pattern = '^' + re.escape(self.file_name) + '-(\\d+)\\.' + re.escape(self.file_ext) + '$'
+        exist_ext = '{}.gz'.format(self.file_ext) if self.compress else self.file_ext
+        exist_pattern = '^' + re.escape(self.file_name) + r'-(\d+)\.' + re.escape(exist_ext) + '$'
         exist_matches = [re.match(exist_pattern, f) for f in os.listdir(self.file_path)]
         exist_indices = [int(m.group(1)) for m in exist_matches if m]
 
@@ -76,8 +96,8 @@ class WriteSplitter(object):
         self.curr_file = None
 
 
-class CsvPooledWriter(object):
-    def __init__(self, pool_path, pool_size, file_size):
+class CsvPooledWriter:
+    def __init__(self, pool_path, pool_size, max_size, compress=True):
         try:
             os.makedirs(pool_path)
         except IOError:
@@ -87,7 +107,8 @@ class CsvPooledWriter(object):
 
         self.pool_path = pool_path
         self.pool_size = pool_size
-        self.file_size = file_size
+        self.max_size = max_size
+        self.compress = compress
 
         self.buffer = io.StringIO()
         self.writer = csv.writer(self.buffer)
@@ -112,7 +133,8 @@ class CsvPooledWriter(object):
                 file_path=self.pool_path,
                 file_name=name,
                 file_ext='csv',
-                max_size=self.file_size
+                max_size=self.max_size,
+                compress=self.compress
             )
             self.order.append(name)
         else:
@@ -125,12 +147,15 @@ class CsvPooledWriter(object):
             del self.files[last]
             self.order.remove(last)
 
-        data = self._encode(row)
+        hash = hash_row(row)
+        data = self._encode([hash] + list(row))
         self.files[name].write(data)
 
     def close(self):
         for file in self.files.values():
             file.close()
+        self.files = {}
+        self.order = []
 
 
 @contextlib.contextmanager
