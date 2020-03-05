@@ -103,8 +103,6 @@ ENV/
 .bazelrc
 .DS_Store
 .idea/
-/bazel-*
-/bazel_pip
 /pip_test
 /_python_build
 *.pyc

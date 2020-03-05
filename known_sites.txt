@@ -10,7 +10,7 @@
 ? instagram.com
 ? avito.ru
 - wikipedia.org
-? kinopoisk.ru
++ kinopoisk.ru
 - rambler.ru
 - gismeteo.ru
 - www.livejournal.com

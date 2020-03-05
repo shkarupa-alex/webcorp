@@ -13,5 +13,5 @@ class GzipItemExporterMixin:
         self.gzfile.close()
 
 
-class CsvGzipItemExporter(GzipItemExporterMixin, CsvItemExporter):
+class CsvGzItemExporter(GzipItemExporterMixin, CsvItemExporter):
     pass

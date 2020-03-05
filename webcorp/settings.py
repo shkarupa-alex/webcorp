@@ -57,7 +57,6 @@ SPIDER_MIDDLEWARES = {
 DOWNLOADER_MIDDLEWARES = {
     'webcorp.middlewares.TorProxyMiddleware': 410,
     'webcorp.middlewares.RelCanonicalDownloaderMiddleware': 585,
-
     'rotating_proxies.middlewares.RotatingProxyMiddleware': 610,
     'rotating_proxies.middlewares.BanDetectionMiddleware': 620,
 }
@@ -65,14 +64,12 @@ DOWNLOADER_MIDDLEWARES = {
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html
 EXTENSIONS = {
-   'scrapy.extensions.telnet.TelnetConsole': None,
+    # 'scrapy.extensions.telnet.TelnetConsole': None,
 }
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-ITEM_PIPELINES = {
-    'webcorp.pipelines.WebcorpPipeline': 300,
-}
+# ITEM_PIPELINES = {}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
@@ -98,38 +95,36 @@ ITEM_PIPELINES = {
 LOG_LEVEL = logging.INFO
 
 ROBOTSTXT_USER_AGENT = 'GoogleBot'
-AUTOTHROTTLE_ENABLED = False
 
-CSV_POOL_PATH = '/mnt/HDD/webcorp/export'
-CSV_POOL_SUBDIR = ''
-CSV_POOL_SIZE = 10
-CSV_FILE_SIZE = 1024 * 2 ** 20  # 1 Gb raw ~= 10 - 160 Mb gzipped
-CSV_FILE_COMPRESS = True
+AUTOTHROTTLE_ENABLED = False
 
 FOLLOW_CANONICAL_LINKS = True
 
-ROTATING_PROXY_LIST = [
-    'http://127.0.0.1:3128',
-    'http://94.130.10.45:3128',
-    'http://95.216.99.233:3128',
-    'http://95.217.76.210:3128',
-]
+ROTATING_PROXY_LIST = None
 ROTATING_PROXY_LOGSTATS_INTERVAL = 300
 
-# try:
-#     from ..local_settings import *
-# except ImportError:
-#     pass
+TOR_PROXY_ENABLED = False
+TOR_HTTP_PROXY = 'http://127.0.0.1:8118'
+TOR_AUTH_PASSWORD = 'secretPassword'
+TOR_CONTROL_PORT = 9051
+TOR_MAX_REQ_PER_IP = 500
 
+FEED_EXPORTERS = {
+    'csv.gz': 'webcorp.exporters.CsvGzItemExporter',
+}
+FEED_FORMAT = 'csv.gz'
 
-# CSV_POOL_PATH = os.path.join(os.path.dirname(sys.modules['webcorp'].__file__), '..', 'export')
-# CONCURRENT_REQUESTS_PER_DOMAIN = 2
-# CONCURRENT_REQUESTS_PER_IP = 2
-#
-# TOR_PROXY_ENABLED = False
-# TOR_HTTP_PROXY = 'http://127.0.0.1:8118'
-# TOR_AUTH_PASSWORD = 'secretPassword'
-# TOR_CONTROL_PORT = 9051
-# TOR_MAX_REQ_PER_IP = 500
-#
-# ROTATING_PROXY_LIST = None
+PRODUCTION_EXPORT_STORAGE = os.path.join('/', 'mnt', 'HDD', 'export')
+DEFAULT_EXPORT_STORAGES = [
+    PRODUCTION_EXPORT_STORAGE,
+    os.path.join('/', 'mnt', 'HDD', 'export'),
+    os.path.join(os.path.dirname(__file__), '..', 'export')
+]
+
+if os.path.exists(PRODUCTION_EXPORT_STORAGE):
+    ROTATING_PROXY_LIST = [
+        'http://127.0.0.1:3128',
+        'http://94.130.10.45:3128',
+        'http://95.216.99.233:3128',
+        'http://95.217.76.210:3128',
+    ]

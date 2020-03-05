@@ -1,16 +1,15 @@
 # -*- coding: utf-8 -*-
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
-from scrapy.utils.project import get_project_settings
-from ..common import cleanup, extract
-from ..storages import csv_joined_reader, check_row
+from ..common import hash_row, scraped_links
 
 
 class Drive2Spider(CrawlSpider):
     custom_settings = {
-        'DEPTH_PRIORITY': 1,
-        'SCHEDULER_DISK_QUEUE': 'scrapy.squeues.PickleFifoDiskQueue',
-        'SCHEDULER_MEMORY_QUEUE': 'scrapy.squeues.FifoMemoryQueue'
+        'DEPTH_LIMIT': 5
+        #     'DEPTH_PRIORITY': 1,
+        #     'SCHEDULER_DISK_QUEUE': 'scrapy.squeues.PickleFifoDiskQueue',
+        #     'SCHEDULER_MEMORY_QUEUE': 'scrapy.squeues.FifoMemoryQueue'
     }
     name = "drive2"
     allowed_domains = [
@@ -47,26 +46,17 @@ class Drive2Spider(CrawlSpider):
             follow=True
         ),
     )
-
     scraped_urls = set()
-    csv_dump_name = 'drive2'
 
     def __init__(self, *args, **kwargs):
         super(Drive2Spider, self).__init__(*args, **kwargs)
 
-        pool_path = get_project_settings().get('CSV_POOL_PATH')
-        with csv_joined_reader(pool_path, self.csv_dump_name) as reader:
-            for row in reader:
-                if not check_row(row):
-                    continue
-                self.scraped_urls.add(row[1])
+        self.scraped_urls = scraped_links(self.name)
+        self.logger.info('Found {} scraped pages'.format(len(self.scraped_urls)))
 
     def parse_item(self, response):
-        # text = extract(cleanup(response.text))
-        text = response.text
-
         yield {
-            '__csv_dump_name': self.csv_dump_name,
+            'hash': hash_row([response.url, response.text]),
             'url': response.url,
-            'html': text
+            'html': response.text
         }

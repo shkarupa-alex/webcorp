@@ -20,7 +20,8 @@ fi
 rm -rf .repairtmp
 mkdir .repairtmp
 
-gunzip -c "${SOURCE}" > .repairtmp/"${NAME}" || true
+gunzip -c "${SOURCE}" > .repairtmp/content.csv || true
+./repaircsv.py .repairtmp/content.csv .repairtmp/"${NAME}"
 gzip -c .repairtmp/"${NAME}" > .repairtmp/"${BASE}"
 
 rm -f "${SOURCE}"

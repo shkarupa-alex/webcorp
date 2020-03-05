@@ -1,27 +1,24 @@
 # -*- coding: utf-8 -*-
-import json
+import csv
+import gzip
 import os
-import re
-from six.moves.urllib.parse import urlparse
-from slugify import slugify  # python-slugify
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
 from scrapy.utils.project import get_project_settings
-from ..common import cleanup, extract
-from ..storages import csv_joined_reader, check_row
+from six.moves.urllib.parse import urlparse
+from ..common import hash_row, scraped_links
 
 
 class LjUserSpider(CrawlSpider):
     custom_settings = {
         'FOLLOW_CANONICAL_LINKS': False,
-        'CSV_POOL_SUBDIR': 'livejournal.com',
-        'CONCURRENT_REQUESTS_PER_DOMAIN': 1,
+        # 'CONCURRENT_REQUESTS_PER_DOMAIN': 1,
         'CONCURRENT_REQUESTS_PER_IP': 1
     }
 
     name = 'lj_user'
     allowed_domains = [
-        'livejournal.com'
+        # 'livejournal.com'
     ]
     start_urls = [
         # 'https://www.livejournal.com/'
@@ -41,14 +38,19 @@ class LjUserSpider(CrawlSpider):
     scraped_urls = set()
 
     def __init__(self, *args, **kwargs):
-        super(LjUserSpider, self).__init__(*args, **kwargs)
-
-        pool_path = get_project_settings().get('CSV_POOL_PATH')
-        with csv_joined_reader(pool_path, 'livejournal_top') as reader:
-            for row in reader:
-                if not check_row(row):
-                    continue
-                self.start_urls.append(row[1])
+        storage_paths = get_project_settings().get('DEFAULT_EXPORT_STORAGES', [])
+        for storage in storage_paths:
+            if not os.path.exists(storage):
+                continue
+            feed = os.path.join(storage, 'livejournal_top-000000000.csv.gz')
+            if not os.path.exists(feed):
+                continue
+            with gzip.open(feed, 'rt', newline='') as f:
+                reader = csv.reader(f)
+                for row in reader:
+                    if len(row) != 2:
+                        raise KeyError('Wrong feed format')
+                    self.start_urls.append(row[1])
         self.logger.info('Found {} users'.format(len(self.start_urls)))
 
         userid = int(kwargs.pop('userid', -1))
@@ -56,24 +58,14 @@ class LjUserSpider(CrawlSpider):
             self.start_urls = []
         else:
             self.start_urls = self.start_urls[userid: userid + 1]
+            self.allowed_domains = [urlparse(self.start_urls[0]).netloc]
 
-        users_path = os.path.join(pool_path, self.custom_settings['CSV_POOL_SUBDIR'])
-        os.makedirs(users_path, exist_ok=True)
-        for url in self.start_urls:
-            domain = urlparse(url).netloc
-            self.allowed_domains.append(domain)
-            csv_dump_name = slugify(domain)
-            with csv_joined_reader(users_path, csv_dump_name) as reader:
-                for row in reader:
-                    if not check_row(row):
-                        continue
-                    self.scraped_urls.add(row[1])
+        self.scraped_urls = scraped_links('{}_{}'.format(self.name, userid))
         self.logger.info('Already scraped {} urls'.format(len(self.scraped_urls)))
 
-    def parse_item(self, response):
-        domain = urlparse(response.url).netloc
-        csv_dump_name = slugify(domain)
+        super(LjUserSpider, self).__init__(*args, **kwargs)
 
+    def parse_item(self, response):
         # comments = []
         # try:
         #     meta_text = re.findall(r'\sSite\.page = (\{")([\s\S]+?)(\});\s+Site', response.text)
@@ -91,10 +83,9 @@ class LjUserSpider(CrawlSpider):
         # comments = '\n\n\n'.join(comments)
         #
         # text = extract(cleanup(response.text)) + '\n' * 10 + comments
-        text = response.text
 
         yield {
-            '__csv_dump_name': csv_dump_name,
+            'hash': hash_row([response.url, response.text]),
             'url': response.url,
-            'html': text
+            'html': response.text
         }
