@@ -4,6 +4,8 @@ import csv
 import gzip
 import hashlib
 import sys
+from bs4 import BeautifulSoup
+from bs4.element import NavigableString
 from nlpclean.html import html_to_article, fragment_to_text
 from multiprocessing import JoinableQueue, Process
 
@@ -25,11 +27,7 @@ class Worker(Process):
                 check = hashlib.md5(content.encode('utf-8')).hexdigest()
 
                 if check == page['hash']:
-                    text = ''
-                    if len(page['html']):
-                        article = html_to_article(page['html'], 'ru')
-                        text = fragment_to_text(article)
-
+                    text = extract_text(page['url'], page['html'])
                     text_content = page['url'] + text
                     text_check = hashlib.md5(text_content.encode('utf-8')).hexdigest()
                     link_check = hashlib.md5(page['url'].encode('utf-8')).hexdigest()
@@ -101,16 +99,245 @@ class Writer(Process):
                         'url': page['url'],
                         'html': ''
                     })
-                    text_writer.writerow({
-                        'hash': page['text_hash'],
-                        'url': page['url'],
-                        'html': page['html']
-                    })
+                    if not page['empty']:
+                        text_writer.writerow({
+                            'hash': page['text_hash'],
+                            'url': page['url'],
+                            'html': page['html']
+                        })
 
             except Exception as e:
                 print('Error: {}'.format(e))
 
             self.trg.task_done()
+
+
+# TODO: h1
+def extract_habr(html):
+    soup = BeautifulSoup(html, 'lxml')
+
+    content = []
+
+    header = [str(node) for node in soup.find_all('h1')]
+    header = '<br><br><br>'.join(header)
+    content.append(header)
+
+    for node in soup.find_all('div', {'class': 'post__text'}):
+        content.append(str(node))
+        content.append('<br>' * 10)
+
+    for node in soup.find_all('div', {'class': 'comment__message'}):
+        content.append(str(node))
+        content.append('<br>' * 3)
+
+    content = '<div>{}</div>'.format(''.join(content))
+
+    return fragment_to_text(content)
+
+
+def extract_dvach(html):
+    soup = BeautifulSoup(html, 'lxml')
+
+    comments = []
+    for c in soup.find_all('article', {'class': 'post__message'}):
+        for t in c.contents:
+            if not isinstance(t, NavigableString):
+                continue
+            t = str(t).strip()
+            if len(t):
+                comments.append(t)
+
+    return '\n\n\n'.join(comments)
+
+
+def extract_kino(html):
+    soup = BeautifulSoup(html, 'lxml')
+
+    content = []
+
+    header = [str(node) for node in soup.find_all('h1')]
+    header = '<br><br><br>'.join(header)
+    content.append(header)
+
+    for node in soup.find_all('div', {'class': 'brand_words'}):
+        content.append(str(node))
+        content.append('<br>' * 10)
+
+    content = '<div>{}</div>'.format(''.join(content))
+
+    return fragment_to_text(content)
+
+
+def extract_lenta(html):
+    soup = BeautifulSoup(html, 'lxml')
+
+    content = []
+
+    header = [str(node) for node in soup.find_all('h1')]
+    header = '<br><br><br>'.join(header)
+    content.append(header)
+
+    for node in soup.find_all('div', {'itemprop': 'articleBody'}):
+        content.append(str(node))
+        content.append('<br>' * 10)
+
+    content = '<div>{}</div>'.format(''.join(content))
+
+    return fragment_to_text(content)
+
+
+def extract_roem(html):
+    soup = BeautifulSoup(html, 'lxml')
+
+    content = []
+
+    header = [str(node) for node in soup.find_all('h1')]
+    header = '<br><br><br>'.join(header)
+    content.append(header)
+
+    for node in soup.find_all('div', {'itemprop': 'articleBody'}):
+        content.append(str(node))
+        content.append('<br>' * 10)
+
+    for node in soup.find_all('div', {'class': 'comment-body'}):
+        content.append(str(node))
+        content.append('<br>' * 3)
+
+    content = '<div>{}</div>'.format(''.join(content))
+
+    return fragment_to_text(content)
+
+
+def extract_ria(html):
+    soup = BeautifulSoup(html, 'lxml')
+
+    content = []
+
+    header = [str(node) for node in soup.find_all('h1')]
+    header = '<br><br><br>'.join(header)
+    content.append(header)
+
+    for node in soup.find_all('div', {'class': 'article__body'}):
+        content.append(str(node))
+        content.append('<br>' * 10)
+
+    content = '<div>{}</div>'.format(''.join(content))
+
+    return fragment_to_text(content)
+
+
+def extract_vc(html):
+    soup = BeautifulSoup(html, 'lxml')
+
+    content = []
+
+    header = [str(node) for node in soup.find_all('h1')]
+    header = '<br><br><br>'.join(header)
+    content.append(header)
+
+    for node in soup.find_all('div', {'class': 'content--full'}):
+        content.append(str(node))
+        content.append('<br>' * 10)
+
+    for node in soup.find_all('div', {'class': 'comments__item__text'}):
+        content.append(str(node))
+        content.append('<br>' * 3)
+
+    content = '<div>{}</div>'.format(''.join(content))
+
+    return fragment_to_text(content)
+
+
+def extract_gazeta(html):
+    soup = BeautifulSoup(html, 'lxml')
+
+    content = []
+
+    header = [str(node) for node in soup.find_all('h1')]
+    header = '<br><br><br>'.join(header)
+    content.append(header)
+
+    for node in soup.find_all('div', {'itemprop': 'articleBody'}):
+        content.append(str(node))
+        content.append('<br>' * 10)
+
+    content = '<div>{}</div>'.format(''.join(content))
+
+    return fragment_to_text(content)
+
+
+def extract_kommersant(html):
+    soup = BeautifulSoup(html, 'lxml')
+
+    content = []
+
+    header = [str(node) for node in soup.find_all('h1')]
+    header = '<br><br><br>'.join(header)
+    content.append(header)
+
+    for node in soup.find_all('div', {'class': 'article_text_wrapper'}):
+        content.append(str(node))
+        content.append('<br>' * 10)
+
+    content = '<div>{}</div>'.format(''.join(content))
+
+    return fragment_to_text(content)
+
+
+def extract_article(html):
+    if not len(html.strip()):
+        return ''
+
+    soup = BeautifulSoup(html, 'lxml')
+
+    header = [str(node) for node in soup.find_all('h1')]
+    header = '<br><br><br>'.join(header)
+
+    article = html_to_article(html, 'ru')
+    text = fragment_to_text('<div>' + header + '<br>' * 3 + article + '</div>')
+
+    return text
+
+
+def extract_text(url, html):
+    if 'https://habr.com/' in url:
+        return extract_habr(html)
+
+    if 'https://2ch.hk/' in url:
+        return extract_dvach(html)
+
+    if 'https://www.kinopoisk.ru/' in url:  # sitemap_0
+        return extract_kino(html)
+
+    if 'https://lenta.ru/' in url:  # sitemap_1
+        return extract_lenta(html)
+
+    if 'https://roem.ru/' in url:  # sitemap_2
+        return extract_roem(html)
+
+    if 'https://roem.ru/' in url:  # sitemap_2
+        return extract_roem(html)
+
+    if 'https://ria.ru/' in url:  # sitemap_3
+        return extract_ria(html)
+
+    if 'https://vc.ru/' in url:  # sitemap_4
+        return extract_vc(html)
+
+    if 'https://www.gazeta.ru/' in url:  # sitemap_5
+        return extract_gazeta(html)
+
+    if 'https://www.kommersant.ru/' in url:  # sitemap_6
+        return extract_kommersant(html)
+
+    return extract_article(html)
+
+
+def csv_without_nulls(iterable):
+    for line in iterable:
+        if '\0' in line:
+            print('NULL-byte found')
+        yield line.replace('\0', '')
 
 
 if __name__ == "__main__":
@@ -137,36 +364,39 @@ if __name__ == "__main__":
         w.start()
     writer.start()
 
+    progress = 0
     try:
-        progress = 0
         with gzip.open(src_name, 'rt', newline='') as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                if len({'hash', 'url', 'html'}.difference(row.keys())):
-                    raise KeyError('Wrong feed format')
+            reader = csv.DictReader(csv_without_nulls(f))
 
-                sources.put(row)
+            try:
+                for row in reader:
+                    if len({'hash', 'url', 'html'}.difference(row.keys())):
+                        raise KeyError('Wrong feed format')
 
-                progress += 1
-                if progress % 100000 == 0:
-                    print('Processed {}00K files'.format(progress // 100000))
+                    if row['url'].startswith('http'):
+                        sources.put(row)
+
+                    progress += 1
+                    if progress % 10000 == 0:
+                        print('Processed {}0K files'.format(progress // 10000))
+            except csv.Error as e:
+                print(e)
 
         sources.join()
-        targets.put('finish')
-        targets.join()
-        for w in workers:
-            w.terminate()
-        writer.join()
 
     except KeyboardInterrupt:
         # Allow ^C to interrupt from any thread.
         print('Keyboard interrupt')
-        for w in workers:
-            w.terminate()
-        writer.terminate()
 
-    except Exception as e:
-        print(e)
-        for w in workers:
-            w.terminate()
-        writer.terminate()
+    sources.close()
+    try:
+        while True: sources.get_nowait()
+    except:
+        pass
+
+    for w in workers:
+        w.terminate()
+
+    targets.put('finish')
+    writer.join()  # targets.join()

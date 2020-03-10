@@ -54,13 +54,19 @@ class LjUserSpider(CrawlSpider):
         self.logger.info('Found {} users'.format(len(self.start_urls)))
 
         userid = int(kwargs.pop('userid', -1))
+        # self.logger.info('---userid: {}'.format(userid))
+        # self.logger.info('---start_urls100: {}'.format(self.start_urls[:100]))
         if userid < 0:
             self.start_urls = []
+            # self.logger.info('---start_urls: {}'.format(self.start_urls))
         else:
             self.start_urls = self.start_urls[userid: userid + 1]
+            # self.logger.info('---start_urls: {}'.format(self.start_urls))
             self.allowed_domains = [urlparse(self.start_urls[0]).netloc]
+            # self.logger.info('---allowed_domains: {}'.format(self.allowed_domains))
 
         self.scraped_urls = scraped_links('{}_{}'.format(self.name, userid))
+        # self.logger.info('---scraped_urls: {}'.format(self.scraped_urls))
         self.logger.info('Already scraped {} urls'.format(len(self.scraped_urls)))
 
         super(LjUserSpider, self).__init__(*args, **kwargs)

@@ -25,18 +25,19 @@ def scraped_links(spider_name):
         if not os.path.exists(storage):
             continue
 
-        feed = os.path.join(storage, '{}.csv.gz'.format(spider_name))
-        if not os.path.exists(feed):
-            continue
+        for phase in ['', '.link.csv.gz'] + ['.link-{}.csv.gz'.format(i) for i in range(10)]:
+            feed = os.path.join(storage, '{}.csv.gz{}'.format(spider_name, phase))
+            if not os.path.exists(feed):
+                continue
 
-        with gzip.open(feed, 'rt', newline='') as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                if len({'hash', 'url', 'html'}.difference(row.keys())):
-                    raise KeyError('Wrong feed format')
+            with gzip.open(feed, 'rt', newline='') as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    if len({'hash', 'url', 'html'}.difference(row.keys())):
+                        raise KeyError('Wrong feed format')
 
-                if hash_row([row['url'], row['html']]) == row['hash']:
-                    result.add(row['url'])
+                    if hash_row([row['url'], row['html']]) == row['hash']:
+                        result.add(row['url'])
 
     return result
 

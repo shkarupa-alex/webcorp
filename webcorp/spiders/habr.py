@@ -11,7 +11,7 @@ class HabrSpider(scrapy.Spider):
     ]
 
     url_template = 'https://habr.com/ru/post/{}/'
-    stop_post = 484118  # 15.01.2020
+    stop_post = 491678  # 10.03.2020
 
     def __init__(self, *args, **kwargs):
         super(HabrSpider, self).__init__(*args, **kwargs)
@@ -19,12 +19,13 @@ class HabrSpider(scrapy.Spider):
         scraped_urls = scraped_links(self.name)
         self.logger.info('Found {} scraped pages'.format(len(scraped_urls)))
 
-        max_id = 1
-        for url in scraped_urls:
-            id = int(url.split('/')[-2])
-            max_id = max(max_id, id)
-
-        for p in range(max_id, self.stop_post):
+        # max_id = 1
+        # for url in scraped_urls:
+        #     id = int(url.split('/')[-2])
+        #     max_id = max(max_id, id)
+        #
+        # for p in range(max_id, self.stop_post):
+        for p in range(1, self.stop_post):
             url = self.url_template.format(p)
             if url in scraped_urls:
                 continue
@@ -33,7 +34,11 @@ class HabrSpider(scrapy.Spider):
     def parse(self, response):
         if '/en/' in response.url:
             self.logger.debug('Skip "en" url {}'.format(response.url))
-            return
+            yield {
+                'hash': hash_row([response.url, '']),
+                'url': response.url,
+                'html': ''
+            }
 
         # comments = response.xpath('//*[contains(@class, "comment__message ")]')
         # comments = [c.extract().strip() for c in comments]

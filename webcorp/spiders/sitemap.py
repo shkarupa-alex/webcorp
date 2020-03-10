@@ -4,15 +4,18 @@ from ..common import hash_row, scraped_links
 
 
 class SitemapSpider(scrapy.spiders.SitemapSpider):
+    custom_settings = {
+        'REDIRECT_ENABLED': False,
+    }
     name = 'sitemap'
     sitemap_urls = [
-        'https://www.kinopoisk.ru/robots.txt',  # todo repair
+        'https://www.kinopoisk.ru/robots.txt',  # kino
         'https://lenta.ru/robots.txt',  # ok
         'https://roem.ru/robots.txt',  # ok
         'https://ria.ru/robots.txt',  # in progress
         'https://vc.ru/robots.txt',  # 4 ok
         'https://www.gazeta.ru/robots.txt',  # in progress
-        'https://www.kommersant.ru/robots.txt',  # todo check
+        'https://www.kommersant.ru/robots.txt',  # kommersant
         'https://www.kp.ru/robots.txt',
         'https://www.mk.ru/robots.txt',
         'https://www.rbc.ru/robots.txt',

@@ -6,8 +6,9 @@ from ..common import hash_row, scraped_links
 class LurkSpider(scrapy.Spider):
     custom_settings = {
         'FOLLOW_CANONICAL_LINKS': False,
-        # 'TOR_PROXY_ENABLED': True,
         'ROBOTSTXT_OBEY': False,
+        'REDIRECT_ENABLED': False,
+        # 'TOR_PROXY_ENABLED': True,
         # 'AUTOTHROTTLE_ENABLED': False,
         # 'CONCURRENT_REQUESTS_PER_DOMAIN': 3,
         # 'CONCURRENT_REQUESTS_PER_IP': 3,
