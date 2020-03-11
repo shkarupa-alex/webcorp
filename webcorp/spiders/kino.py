@@ -3,7 +3,7 @@ import scrapy
 from ..common import hash_row, scraped_links
 
 
-class KinoSpider(scrapy.Spider):
+class KinoSpider(scrapy.Spider):  # shows captcha
     custom_settings = {
         'FOLLOW_CANONICAL_LINKS': False,
         'ROBOTSTXT_OBEY': False,

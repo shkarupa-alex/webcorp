@@ -112,8 +112,7 @@ class Writer(Process):
             self.trg.task_done()
 
 
-# TODO: h1
-def extract_habr(html):
+def extract_drive2(html):
     soup = BeautifulSoup(html, 'lxml')
 
     content = []
@@ -122,11 +121,15 @@ def extract_habr(html):
     header = '<br><br><br>'.join(header)
     content.append(header)
 
-    for node in soup.find_all('div', {'class': 'post__text'}):
+    for node in soup.find_all('div', {'itemprop': 'articleBody'}):
         content.append(str(node))
         content.append('<br>' * 10)
 
-    for node in soup.find_all('div', {'class': 'comment__message'}):
+    for node in soup.find_all('div', {'itemprop': 'reviewBody'}):
+        content.append(str(node))
+        content.append('<br>' * 10)
+
+    for node in soup.find_all('div', {'class': 'c-comment__text'}):
         content.append(str(node))
         content.append('<br>' * 3)
 
@@ -150,7 +153,7 @@ def extract_dvach(html):
     return '\n\n\n'.join(comments)
 
 
-def extract_kino(html):
+def extract_habr(html):
     soup = BeautifulSoup(html, 'lxml')
 
     content = []
@@ -159,13 +162,35 @@ def extract_kino(html):
     header = '<br><br><br>'.join(header)
     content.append(header)
 
-    for node in soup.find_all('div', {'class': 'brand_words'}):
+    for node in soup.find_all('div', {'class': 'post__text'}):
         content.append(str(node))
         content.append('<br>' * 10)
+
+    for node in soup.find_all('div', {'class': 'comment__message'}):
+        content.append(str(node))
+        content.append('<br>' * 3)
 
     content = '<div>{}</div>'.format(''.join(content))
 
     return fragment_to_text(content)
+
+
+# def extract_kino(html):
+#     soup = BeautifulSoup(html, 'lxml')
+#
+#     content = []
+#
+#     header = [str(node) for node in soup.find_all('h1')]
+#     header = '<br><br><br>'.join(header)
+#     content.append(header)
+#
+#     for node in soup.find_all('div', {'class': 'brand_words'}):
+#         content.append(str(node))
+#         content.append('<br>' * 10)
+#
+#     content = '<div>{}</div>'.format(''.join(content))
+#
+#     return fragment_to_text(content)
 
 
 def extract_lenta(html):
@@ -300,14 +325,17 @@ def extract_article(html):
 
 
 def extract_text(url, html):
-    if 'https://habr.com/' in url:
-        return extract_habr(html)
+    if 'https://www.drive2.ru/' in url:
+        return extract_drive2(html)
 
     if 'https://2ch.hk/' in url:
         return extract_dvach(html)
 
-    if 'https://www.kinopoisk.ru/' in url:  # sitemap_0
-        return extract_kino(html)
+    if 'https://habr.com/' in url:
+        return extract_habr(html)
+
+    # if 'https://www.kinopoisk.ru/' in url:  # sitemap_0
+    #     return extract_kino(html)
 
     if 'https://lenta.ru/' in url:  # sitemap_1
         return extract_lenta(html)

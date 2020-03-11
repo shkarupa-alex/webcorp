@@ -9,19 +9,19 @@ class SitemapSpider(scrapy.spiders.SitemapSpider):
     }
     name = 'sitemap'
     sitemap_urls = [
-        'https://www.kinopoisk.ru/robots.txt',  # kino
-        'https://lenta.ru/robots.txt',  # ok
-        'https://roem.ru/robots.txt',  # ok
-        'https://ria.ru/robots.txt',  # in progress
-        'https://vc.ru/robots.txt',  # 4 ok
-        'https://www.gazeta.ru/robots.txt',  # in progress
-        'https://www.kommersant.ru/robots.txt',  # kommersant
-        'https://www.kp.ru/robots.txt',
-        'https://www.mk.ru/robots.txt',
-        'https://www.rbc.ru/robots.txt',
-        'https://www.sport-express.ru/robots.txt',
-        'http://www.woman.ru/robots.txt',
-        'https://zen.yandex.ru/robots.txt',
+        'https://www.kinopoisk.ru/robots.txt',  # 0 -> kino -> captcha
+        'https://lenta.ru/robots.txt',  # 1
+        'https://roem.ru/robots.txt',  # 2 done
+        'https://ria.ru/robots.txt',  # 3
+        'https://vc.ru/robots.txt',  # 4 done
+        'https://www.gazeta.ru/robots.txt',  # 5
+        'https://www.kommersant.ru/robots.txt',  # 6 -> kommersant
+        'https://www.kp.ru/robots.txt',  # 7 todo https://www.kp.ru/daily/0/4176148/ + https://www.kp.ru/online/news/3792228/
+        'https://www.mk.ru/robots.txt',  # 8
+        'https://www.rbc.ru/robots.txt',  # 9
+        'https://www.sport-express.ru/robots.txt',  # 10
+        'http://www.woman.ru/robots.txt',  # 11
+        'https://zen.yandex.ru/robots.txt',  # 12
         # 'https://irecommend.ru/robots.txt',  # custom parse
         # 'https://otvet.mail.ru/robots.txt',  # custom parse
         # 'https://pikabu.ru/robots.txt',  # custom parse comments
