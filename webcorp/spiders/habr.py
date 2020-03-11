@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import scrapy
-from scrapy.utils.project import get_project_settings
-from ..storages import csv_joined_reader
+from ..common import hash_row, scraped_links
 
 
 class HabrSpider(scrapy.Spider):
@@ -11,36 +10,45 @@ class HabrSpider(scrapy.Spider):
         # 'https://habr.com/'
     ]
 
-    csv_dump_name = 'habr'
-    stop_post = 484118  # 15.01.2020
     url_template = 'https://habr.com/ru/post/{}/'
+    stop_post = 491678  # 10.03.2020
 
     def __init__(self, *args, **kwargs):
         super(HabrSpider, self).__init__(*args, **kwargs)
 
-        start_post = 1
-        pool_path = get_project_settings().get('CSV_POOL_PATH')
-        with csv_joined_reader(pool_path, self.csv_dump_name) as reader:
-            for row in reader:
-                start_post = max(start_post, int(row[0]))
+        scraped_urls = scraped_links(self.name)
+        self.logger.info('Found {} scraped pages'.format(len(scraped_urls)))
 
-        for p in range(start_post, self.stop_post):
-            self.start_urls.append(self.url_template.format(p))
+        # max_id = 1
+        # for url in scraped_urls:
+        #     id = int(url.split('/')[-2])
+        #     max_id = max(max_id, id)
+        #
+        # for p in range(max_id, self.stop_post):
+        for p in range(1, self.stop_post):
+            url = self.url_template.format(p)
+            if url in scraped_urls:
+                continue
+            self.start_urls.append(url)
 
     def parse(self, response):
         if '/en/' in response.url:
             self.logger.debug('Skip "en" url {}'.format(response.url))
-            return
+            yield {
+                'hash': hash_row([response.url, '']),
+                'url': response.url,
+                'html': ''
+            }
 
-        id = int(response.url.split('/')[-2])
-        if id < 1:
-            self.logger.warning('Wrong "id" in url {}'.format(response.url))
-            return
-
-        html = response.body.decode(response.encoding)
+        # comments = response.xpath('//*[contains(@class, "comment__message ")]')
+        # comments = [c.extract().strip() for c in comments]
+        # comments = [c for c in comments if len(c)]
+        # comments = '\n\n\n'.join(comments)
+        #
+        # text = extract(cleanup(response.text)) + '\n' * 10 + comments
 
         yield {
-            '__csv_dump_name': self.csv_dump_name,
-            'id': id,
-            'html': html
+            'hash': hash_row([response.url, response.text]),
+            'url': response.url,
+            'html': response.text
         }
