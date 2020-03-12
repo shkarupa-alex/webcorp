@@ -406,8 +406,22 @@ if __name__ == "__main__":
                         sources.put(row)
 
                     progress += 1
+
                     if progress % 10000 == 0:
                         print('Processed {}0K files'.format(progress // 10000))
+
+                    if progress % 100000 == 0:
+                        sources.join()
+
+                        print('Restarting workers')
+                        for w in workers:
+                            w.terminate()
+
+                        workers = [Worker(sources, targets) for i in range(argv.workers)]
+                        for w in workers:
+                            w.daemon = True
+                            w.start()
+
             except csv.Error as e:
                 print(e)
 

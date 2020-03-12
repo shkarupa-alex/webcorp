@@ -6,7 +6,7 @@ from ..common import hash_row, scraped_links
 
 class Drive2Spider(CrawlSpider):
     custom_settings = {
-        'DEPTH_LIMIT': 5
+        'DEPTH_LIMIT': 6
         #     'DEPTH_PRIORITY': 1,
         #     'SCHEDULER_DISK_QUEUE': 'scrapy.squeues.PickleFifoDiskQueue',
         #     'SCHEDULER_MEMORY_QUEUE': 'scrapy.squeues.FifoMemoryQueue'

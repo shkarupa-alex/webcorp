@@ -16,15 +16,15 @@ class SitemapSpider(scrapy.spiders.SitemapSpider):
         'https://vc.ru/robots.txt',  # 4 done
         'https://www.gazeta.ru/robots.txt',  # 5
         'https://www.kommersant.ru/robots.txt',  # 6 -> kommersant
-        'https://www.kp.ru/robots.txt',  # 7 todo https://www.kp.ru/daily/0/4176148/ + https://www.kp.ru/online/news/3792228/
-        'https://www.mk.ru/robots.txt',  # 8
+        'https://www.kp.ru/robots.txt',  # 7 -> kp
+        'https://www.mk.ru/robots.txt',  # 8 todo check volg.*
         'https://www.rbc.ru/robots.txt',  # 9
         'https://www.sport-express.ru/robots.txt',  # 10
         'http://www.woman.ru/robots.txt',  # 11
         'https://zen.yandex.ru/robots.txt',  # 12
-        # 'https://irecommend.ru/robots.txt',  # custom parse
-        # 'https://otvet.mail.ru/robots.txt',  # custom parse
-        # 'https://pikabu.ru/robots.txt',  # custom parse comments
+        'https://irecommend.ru/robots.txt',  # 13
+        'https://otvet.mail.ru/robots.txt',  # 14
+        'https://pikabu.ru/robots.txt',  # 15 comments
     ]
 
     scraped_urls = set()
