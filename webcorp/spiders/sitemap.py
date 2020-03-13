@@ -20,7 +20,7 @@ class SitemapSpider(scrapy.spiders.SitemapSpider):
         'https://www.mk.ru/robots.txt',  # 8 todo check volg.*
         'https://www.rbc.ru/robots.txt',  # 9
         'https://www.sport-express.ru/robots.txt',  # 10
-        'http://www.woman.ru/robots.txt',  # 11
+        'http://www.woman.ru/robots.txt',  # 11 todo: run with redirects
         'https://zen.yandex.ru/robots.txt',  # 12
         'https://irecommend.ru/robots.txt',  # 13
         'https://otvet.mail.ru/robots.txt',  # 14

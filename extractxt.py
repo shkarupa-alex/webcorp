@@ -21,6 +21,9 @@ class Worker(Process):
 
         while True:
             page = self.src.get()
+            if not page:
+                self.src.task_done()
+                return
 
             try:
                 content = page['url'] + page['html']
@@ -67,44 +70,41 @@ class Writer(Process):
         last_link = None
         last_text = None
 
-        finished = False
-        while not finished:
+        while True:
             page = self.trg.get()
+            if not page:
+                link_file.flush()
+                link_file.close()
+                text_file.flush()
+                text_file.close()
+                self.trg.task_done()
+                return
 
             try:
-                if 'finish' == page:
-                    link_file.flush()
-                    link_file.close()
+                if page['url'] in link_duplicates:
+                    print('Duplicate link {}'.format(page['url']))
+                    continue
+                else:
+                    link_duplicates.add(page['url'])
 
-                    text_file.flush()
-                    text_file.close()
-                    finished = True
+                if not page['empty'] and len(page['html']) and last_text == page['html']:
+                    print('Duplicate text {} vs {}'.format(page['url'], last_link))
+                    continue
+                elif not page['empty'] and len(page['html']):
+                    last_text = page['html']
+                    last_link = page['url']
 
-                elif not finished:
-                    if page['url'] in link_duplicates:
-                        print('Duplicate link {}'.format(page['url']))
-                        continue
-                    else:
-                        link_duplicates.add(page['url'])
-
-                    if not page['empty'] and len(page['html']) and last_text == page['html']:
-                        print('Duplicate text {} vs {}'.format(page['url'], last_link))
-                        continue
-                    elif not page['empty'] and len(page['html']):
-                        last_text = page['html']
-                        last_link = page['url']
-
-                    link_writer.writerow({
-                        'hash': page['link_hash'],
+                link_writer.writerow({
+                    'hash': page['link_hash'],
+                    'url': page['url'],
+                    'html': ''
+                })
+                if not page['empty']:
+                    text_writer.writerow({
+                        'hash': page['text_hash'],
                         'url': page['url'],
-                        'html': ''
+                        'html': page['html']
                     })
-                    if not page['empty']:
-                        text_writer.writerow({
-                            'hash': page['text_hash'],
-                            'url': page['url'],
-                            'html': page['html']
-                        })
 
             except Exception as e:
                 print('Error: {}'.format(e))
@@ -358,6 +358,25 @@ def extract_text(url, html):
     if 'https://www.kommersant.ru/' in url:  # sitemap_6
         return extract_kommersant(html)
 
+    # if 'https://www.kp.ru/' in url:  # sitemap_7
+    #     return extract_kp(html)
+    # if 'https://www.mk.ru/' in url:  # sitemap_8
+    #     return extract_mk(html)
+    # if 'https://www.rbc.ru/' in url:  # sitemap_9
+    #     return extract_rbc(html)
+    # if 'https://www.sport-express.ru/' in url:  # sitemap_10
+    #     return extract_sport(html)
+    # if 'https://www.woman.ru/' in url:  # sitemap_11
+    #     return extract_woman(html)
+    # if 'https://zen.yandex.ru/' in url:  # sitemap_12
+    #     return extract_zen(html)
+    # if 'https://irecommend.ru/' in url:  # sitemap_13
+    #     return extract_irec(html)
+    # if 'https://otvet.mail.ru/' in url:  # sitemap_14
+    #     return extract_otvet(html)
+    # if 'https://pikabu.ru/' in url:  # sitemap_15
+    #     return extract_pikabu(html)
+
     return extract_article(html)
 
 
@@ -368,10 +387,25 @@ def csv_without_nulls(iterable):
         yield line.replace('\0', '')
 
 
+def _restart_workers(cnt, cur, src, trg):
+    # Stop current workers
+    for _ in cur:
+        src.put(False)
+    for wrk in cur:
+        wrk.join()
+
+    # Start next workers
+    nxt = [Worker(src, trg) for _ in range(cnt)]
+    for wrk in nxt:
+        wrk.start()
+
+    return nxt
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Extract text and links from csv.gz dump')
     parser.add_argument('src_file', type=argparse.FileType('rb'), help='source file')
-    parser.add_argument('-workers', type=int, default=8, help='workers count')
+    parser.add_argument('-workers', type=int, default=12, help='workers count')
 
     argv, _ = parser.parse_known_args()
     if argv.workers < 1:
@@ -384,12 +418,9 @@ if __name__ == "__main__":
 
     sources = JoinableQueue(argv.workers * 4)
     targets = JoinableQueue(argv.workers * 4)
-    workers = [Worker(sources, targets) for i in range(argv.workers)]
-    writer = Writer(src_name, targets)
 
-    for w in workers:
-        w.daemon = True
-        w.start()
+    workers = _restart_workers(argv.workers, [], sources, targets)
+    writer = Writer(src_name, targets)
     writer.start()
 
     progress = 0
@@ -411,34 +442,26 @@ if __name__ == "__main__":
                         print('Processed {}0K files'.format(progress // 10000))
 
                     if progress % 100000 == 0:
-                        sources.join()
-
                         print('Restarting workers')
-                        for w in workers:
-                            w.terminate()
-
-                        workers = [Worker(sources, targets) for i in range(argv.workers)]
-                        for w in workers:
-                            w.daemon = True
-                            w.start()
+                        workers = _restart_workers(argv.workers, workers, sources, targets)
 
             except csv.Error as e:
                 print(e)
 
-        sources.join()
+        workers = _restart_workers(0, workers, sources, targets)
 
     except KeyboardInterrupt:
         # Allow ^C to interrupt from any thread.
         print('Keyboard interrupt')
 
-    sources.close()
-    try:
-        while True: sources.get_nowait()
-    except:
-        pass
+        try:
+            while True: sources.get_nowait()
+        except:
+            pass
+        sources.close()
 
-    for w in workers:
-        w.terminate()
+        for wrk in workers:
+            wrk.terminate()
 
-    targets.put('finish')
+    targets.put(False)
     writer.join()  # targets.join()
