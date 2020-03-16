@@ -117,19 +117,19 @@ def extract_drive2(html):
 
     content = []
 
-    header = [str(node) for node in soup.find_all('h1')]
+    header = [str(node) for node in soup('h1')]
     header = '<br><br><br>'.join(header)
     content.append(header)
 
-    for node in soup.find_all('div', {'itemprop': 'articleBody'}):
+    for node in soup('div', {'itemprop': 'articleBody'}):
         content.append(str(node))
         content.append('<br>' * 10)
 
-    for node in soup.find_all('div', {'itemprop': 'reviewBody'}):
+    for node in soup('div', {'itemprop': 'reviewBody'}):
         content.append(str(node))
         content.append('<br>' * 10)
 
-    for node in soup.find_all('div', {'class': 'c-comment__text'}):
+    for node in soup('div', {'class': 'c-comment__text'}):
         content.append(str(node))
         content.append('<br>' * 3)
 
@@ -142,7 +142,7 @@ def extract_dvach(html):
     soup = BeautifulSoup(html, 'lxml')
 
     comments = []
-    for c in soup.find_all('article', {'class': 'post__message'}):
+    for c in soup('article', {'class': 'post__message'}):
         for t in c.contents:
             if not isinstance(t, NavigableString):
                 continue
@@ -158,15 +158,15 @@ def extract_habr(html):
 
     content = []
 
-    header = [str(node) for node in soup.find_all('h1')]
+    header = [str(node) for node in soup('h1')]
     header = '<br><br><br>'.join(header)
     content.append(header)
 
-    for node in soup.find_all('div', {'class': 'post__text'}):
+    for node in soup('div', {'class': 'post__text'}):
         content.append(str(node))
         content.append('<br>' * 10)
 
-    for node in soup.find_all('div', {'class': 'comment__message'}):
+    for node in soup('div', {'class': 'comment__message'}):
         content.append(str(node))
         content.append('<br>' * 3)
 
@@ -180,11 +180,11 @@ def extract_habr(html):
 #
 #     content = []
 #
-#     header = [str(node) for node in soup.find_all('h1')]
+#     header = [str(node) for node in soup('h1')]
 #     header = '<br><br><br>'.join(header)
 #     content.append(header)
 #
-#     for node in soup.find_all('div', {'class': 'brand_words'}):
+#     for node in soup('div', {'class': 'brand_words'}):
 #         content.append(str(node))
 #         content.append('<br>' * 10)
 #
@@ -198,11 +198,11 @@ def extract_lenta(html):
 
     content = []
 
-    header = [str(node) for node in soup.find_all('h1')]
+    header = [str(node) for node in soup('h1')]
     header = '<br><br><br>'.join(header)
     content.append(header)
 
-    for node in soup.find_all('div', {'itemprop': 'articleBody'}):
+    for node in soup('div', {'itemprop': 'articleBody'}):
         content.append(str(node))
         content.append('<br>' * 10)
 
@@ -216,15 +216,15 @@ def extract_roem(html):
 
     content = []
 
-    header = [str(node) for node in soup.find_all('h1')]
+    header = [str(node) for node in soup('h1')]
     header = '<br><br><br>'.join(header)
     content.append(header)
 
-    for node in soup.find_all('div', {'itemprop': 'articleBody'}):
+    for node in soup('div', {'itemprop': 'articleBody'}):
         content.append(str(node))
         content.append('<br>' * 10)
 
-    for node in soup.find_all('div', {'class': 'comment-body'}):
+    for node in soup('div', {'class': 'comment-body'}):
         content.append(str(node))
         content.append('<br>' * 3)
 
@@ -238,11 +238,11 @@ def extract_ria(html):
 
     content = []
 
-    header = [str(node) for node in soup.find_all('h1')]
+    header = [str(node) for node in soup('h1')]
     header = '<br><br><br>'.join(header)
     content.append(header)
 
-    for node in soup.find_all('div', {'class': 'article__body'}):
+    for node in soup('div', {'class': 'article__body'}):
         content.append(str(node))
         content.append('<br>' * 10)
 
@@ -256,15 +256,15 @@ def extract_vc(html):
 
     content = []
 
-    header = [str(node) for node in soup.find_all('h1')]
+    header = [str(node) for node in soup('h1')]
     header = '<br><br><br>'.join(header)
     content.append(header)
 
-    for node in soup.find_all('div', {'class': 'content--full'}):
+    for node in soup('div', {'class': 'content--full'}):
         content.append(str(node))
         content.append('<br>' * 10)
 
-    for node in soup.find_all('div', {'class': 'comments__item__text'}):
+    for node in soup('div', {'class': 'comments__item__text'}):
         content.append(str(node))
         content.append('<br>' * 3)
 
@@ -278,11 +278,11 @@ def extract_gazeta(html):
 
     content = []
 
-    header = [str(node) for node in soup.find_all('h1')]
+    header = [str(node) for node in soup('h1')]
     header = '<br><br><br>'.join(header)
     content.append(header)
 
-    for node in soup.find_all('div', {'itemprop': 'articleBody'}):
+    for node in soup('div', {'itemprop': 'articleBody'}):
         content.append(str(node))
         content.append('<br>' * 10)
 
@@ -296,11 +296,39 @@ def extract_kommersant(html):
 
     content = []
 
-    header = [str(node) for node in soup.find_all('h1')]
+    header = [str(node) for node in soup('h1')]
     header = '<br><br><br>'.join(header)
     content.append(header)
 
-    for node in soup.find_all('div', {'class': 'article_text_wrapper'}):
+    for node in soup('div', {'class': 'article_text_wrapper'}):
+        content.append(str(node))
+        content.append('<br>' * 10)
+
+    content = '<div>{}</div>'.format(''.join(content))
+
+    return fragment_to_text(content)
+
+
+def extract_lurk(html):
+    if 'В базе данных не найдено' in html:
+        return ''
+
+    soup = BeautifulSoup(html, 'lxml')
+
+    for node in soup('table', {'class': 'lm-plashka'}):
+        node.extract()
+    for node in soup('div', {'id': 'toc'}):
+        node.extract()
+    for node in soup('div', {'class': 'buttons-line'}):
+        node.extract()
+
+    content = []
+
+    header = [str(node) for node in soup('h1')]
+    header = '<br><br><br>'.join(header)
+    content.append(header)
+
+    for node in soup('div', {'id': 'mw-content-text'}):
         content.append(str(node))
         content.append('<br>' * 10)
 
@@ -315,7 +343,7 @@ def extract_article(html):
 
     soup = BeautifulSoup(html, 'lxml')
 
-    header = [str(node) for node in soup.find_all('h1')]
+    header = [str(node) for node in soup('h1')]
     header = '<br><br><br>'.join(header)
 
     article = html_to_article(html, 'ru')
@@ -376,6 +404,9 @@ def extract_text(url, html):
     #     return extract_otvet(html)
     # if 'https://pikabu.ru/' in url:  # sitemap_15
     #     return extract_pikabu(html)
+
+    if 'http://lurkmore.net/' in url:  # sitemap_6
+        return extract_lurk(html)
 
     return extract_article(html)
 

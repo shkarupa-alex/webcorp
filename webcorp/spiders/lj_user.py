@@ -12,8 +12,9 @@ from ..common import hash_row, scraped_links
 class LjUserSpider(CrawlSpider):
     custom_settings = {
         'FOLLOW_CANONICAL_LINKS': False,
-        # 'CONCURRENT_REQUESTS_PER_DOMAIN': 1,
-        'CONCURRENT_REQUESTS_PER_IP': 1
+        'CONCURRENT_REQUESTS_PER_DOMAIN': 1,
+        'CONCURRENT_REQUESTS_PER_IP': 1,
+        'DOWNLOAD_DELAY': 5
     }
 
     name = 'lj_user'

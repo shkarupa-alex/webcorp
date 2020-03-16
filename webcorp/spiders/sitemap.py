@@ -19,12 +19,12 @@ class SitemapSpider(scrapy.spiders.SitemapSpider):
         'https://www.kp.ru/robots.txt',  # 7 -> kp
         'https://www.mk.ru/robots.txt',  # 8 todo check volg.*
         'https://www.rbc.ru/robots.txt',  # 9
-        'https://www.sport-express.ru/robots.txt',  # 10
+        'https://www.sport-express.ru/robots.txt',  # 10 todo: run with redirects
         'http://www.woman.ru/robots.txt',  # 11 todo: run with redirects
         'https://zen.yandex.ru/robots.txt',  # 12
-        'https://irecommend.ru/robots.txt',  # 13
+        'https://irecommend.ru/robots.txt',  # 13 todo: slowdown
         'https://otvet.mail.ru/robots.txt',  # 14
-        'https://pikabu.ru/robots.txt',  # 15 comments
+        'https://pikabu.ru/robots.txt',  # 15 comments todo: run with redirects
     ]
 
     scraped_urls = set()
