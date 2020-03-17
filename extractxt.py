@@ -328,6 +328,13 @@ def extract_lurk(html):
     header = '<br><br><br>'.join(header)
     content.append(header)
 
+    for bad_title in [
+        'User:', 'Mediawiki:', 'Special:', 'Lurkmore:', 'Участник:', 'Служебная:', 'Обсуждение:', 'Категория:',
+        'Портал:', 'Обсуждение портала:', 'Шаблон:', 'Обсуждение участника:'
+    ]:
+        if bad_title in header:
+            return ''
+
     for node in soup('div', {'id': 'mw-content-text'}):
         content.append(str(node))
         content.append('<br>' * 10)
