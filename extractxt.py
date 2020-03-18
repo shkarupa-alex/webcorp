@@ -236,6 +236,9 @@ def extract_roem(html):
 def extract_ria(html):
     soup = BeautifulSoup(html, 'lxml')
 
+    for node in soup('div', {'class': 'm-image'}):
+        node.extract()
+
     content = []
 
     header = [str(node) for node in soup('h1')]
@@ -308,6 +311,50 @@ def extract_kommersant(html):
 
     return fragment_to_text(content)
 
+def extract_mk(html):
+    soup = BeautifulSoup(html, 'lxml')
+
+    content = []
+
+    header = [str(node) for node in soup('h1')]
+    header = '<br><br><br>'.join(header)
+    content.append(header)
+
+    for node in soup('div', {'itemprop': 'description'}):
+        content.append(str(node))
+        content.append('<br>' * 10)
+
+    for node in soup('div', {'itemprop': 'articleBody'}):
+        content.append(str(node))
+        content.append('<br>' * 10)
+
+    content = '<div>{}</div>'.format(''.join(content))
+
+    return fragment_to_text(content)
+
+def extract_rbc(html):
+    soup = BeautifulSoup(html, 'lxml')
+
+    for node in soup('div', {'class': 'article__main-image'}):
+        node.extract()
+
+    content = []
+
+    header = [str(node) for node in soup('h1')]
+    header = '<br><br><br>'.join(header)
+    content.append(header)
+
+    for node in soup('div', {'class': 'article__header__subtitle'}):
+        content.append(str(node))
+        content.append('<br>' * 10)
+
+    for node in soup('div', {'itemprop': 'articleBody'}):
+        content.append(str(node))
+        content.append('<br>' * 10)
+
+    content = '<div>{}</div>'.format(''.join(content))
+
+    return fragment_to_text(content)
 
 def extract_lurk(html):
     if 'В базе данных не найдено' in html:
@@ -321,16 +368,22 @@ def extract_lurk(html):
         node.extract()
     for node in soup('div', {'class': 'buttons-line'}):
         node.extract()
+    for node in soup('div', {'class': 'noprint'}):
+        node.extract()
 
     content = []
 
-    header = [str(node) for node in soup('h1')]
+    header = [str(node) for node in soup('h1')]    # if 'https://www.rbc.ru/' in url:  # sitemap_9
+    #     return extract_rbc(html)
+
     header = '<br><br><br>'.join(header)
     content.append(header)
 
     for bad_title in [
         'User:', 'Mediawiki:', 'Special:', 'Lurkmore:', 'Участник:', 'Служебная:', 'Обсуждение:', 'Категория:',
-        'Портал:', 'Обсуждение портала:', 'Шаблон:', 'Обсуждение участника:'
+        'Портал:', 'Обсуждение портала:', 'Шаблон:', 'Обсуждение участника:', 'Файл:', 'Обсуждение категории:',
+        'Обсуждение шаблона:', 'Обсуждение копипасты:', 'Обсуждение смехуечков:', 'Обсуждение файла:',
+        'Смехуечки:', 'Обсуждение MediaWiki:'
     ]:
         if bad_title in header:
             return ''
@@ -378,9 +431,6 @@ def extract_text(url, html):
     if 'https://roem.ru/' in url:  # sitemap_2
         return extract_roem(html)
 
-    if 'https://roem.ru/' in url:  # sitemap_2
-        return extract_roem(html)
-
     if 'https://ria.ru/' in url:  # sitemap_3
         return extract_ria(html)
 
@@ -395,10 +445,13 @@ def extract_text(url, html):
 
     # if 'https://www.kp.ru/' in url:  # sitemap_7
     #     return extract_kp(html)
-    # if 'https://www.mk.ru/' in url:  # sitemap_8
-    #     return extract_mk(html)
-    # if 'https://www.rbc.ru/' in url:  # sitemap_9
-    #     return extract_rbc(html)
+
+    if 'https://www.mk.ru/' in url:  # sitemap_8
+        return extract_mk(html)
+
+    if 'https://www.rbc.ru/' in url:  # sitemap_9
+        return extract_rbc(html)
+
     # if 'https://www.sport-express.ru/' in url:  # sitemap_10
     #     return extract_sport(html)
     # if 'https://www.woman.ru/' in url:  # sitemap_11
@@ -463,7 +516,7 @@ if __name__ == "__main__":
 
     progress = 0
     try:
-        with gzip.open(src_name, 'rt', newline='') as f:
+        with gzip.open(src_name, 'rt', newline='', errors='replace') as f:
             reader = csv.DictReader(csv_without_nulls(f))
 
             try:
@@ -471,6 +524,8 @@ if __name__ == "__main__":
                     if len({'hash', 'url', 'html'}.difference(row.keys())):
                         raise KeyError('Wrong feed format')
 
+                    if not row['hash'] or not row['url'] or not row['html']:
+                        continue
                     if row['url'].startswith('http'):
                         sources.put(row)
 
