@@ -311,6 +311,7 @@ def extract_kommersant(html):
 
     return fragment_to_text(content)
 
+
 def extract_mk(html):
     soup = BeautifulSoup(html, 'lxml')
 
@@ -331,6 +332,7 @@ def extract_mk(html):
     content = '<div>{}</div>'.format(''.join(content))
 
     return fragment_to_text(content)
+
 
 def extract_rbc(html):
     soup = BeautifulSoup(html, 'lxml')
@@ -356,6 +358,7 @@ def extract_rbc(html):
 
     return fragment_to_text(content)
 
+
 def extract_lurk(html):
     if 'В базе данных не найдено' in html:
         return ''
@@ -364,17 +367,18 @@ def extract_lurk(html):
 
     for node in soup('table', {'class': 'lm-plashka'}):
         node.extract()
-    for node in soup('div', {'id': 'toc'}):
+    for node in soup('table', {'id': 'toc'}):
         node.extract()
     for node in soup('div', {'class': 'buttons-line'}):
         node.extract()
     for node in soup('div', {'class': 'noprint'}):
         node.extract()
+    for node in soup(None, {'class': 'mw-collapsible'}):
+        node.extract()
 
     content = []
 
-    header = [str(node) for node in soup('h1')]    # if 'https://www.rbc.ru/' in url:  # sitemap_9
-    #     return extract_rbc(html)
+    header = [str(node) for node in soup('h1')]
 
     header = '<br><br><br>'.join(header)
     content.append(header)
