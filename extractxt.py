@@ -532,7 +532,7 @@ def extract_text(url, html):
     # if 'https://pikabu.ru/' in url:  # sitemap_15
     #     return extract_pikabu(html)
 
-    if 'http://lurkmore.net/' in url:  # sitemap_6
+    if 'http://lurkmore.net/' in url:
         return extract_lurk(html)
 
     return extract_article(html)
