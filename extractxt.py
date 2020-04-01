@@ -405,6 +405,9 @@ def extract_woman(html):
     for node in soup('div', {'class': 'article-info'}):
         node.extract()
 
+    for node in soup('div', {'class': 'article__tags'}):
+        node.extract()
+
     content = []
 
     header = [str(node) for node in soup('h1')]
@@ -475,11 +478,18 @@ def extract_otvet(html):
 def extract_pikabu(html):
     soup = BeautifulSoup(html, 'lxml')
 
+    for node in soup('div', {'class': 'sidebar'}):
+        node.extract()
+
     content = []
 
     header = [str(node) for node in soup('h1')]
     header = '<br><br><br>'.join(header)
     content.append(header)
+
+    for node in soup('div', {'class': 'story__description'}):
+        content.append(str(node))
+        content.append('<br>' * 10)
 
     for node in soup('div', {'class': 'story__content'}):
         content.append(str(node))
@@ -594,7 +604,7 @@ def extract_text(url, html):
     if 'https://www.sport-express.ru/' in url:  # sitemap_10
         return extract_sport(html)
 
-    if 'https://www.woman.ru/' in url:  # sitemap_11
+    if 'http://www.woman.ru/' in url or 'https://www.woman.ru/' in url:  # sitemap_11
         return extract_woman(html)
 
     if 'https://zen.yandex.ru/' in url:  # sitemap_12
