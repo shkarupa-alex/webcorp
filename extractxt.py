@@ -312,6 +312,28 @@ def extract_kommersant(html):
     return fragment_to_text(content)
 
 
+def extract_kp(html):
+    soup = BeautifulSoup(html, 'lxml')
+
+    content = []
+
+    header = [str(node) for node in soup('h1')]
+    header = '<br><br><br>'.join(header)
+    content.append(header)
+
+    for node in soup('div', {'class': 'ArticleDescription'}):
+        content.append(str(node))
+        content.append('<br>' * 10)
+
+    for node in soup('div', {'class': 'text'}):
+        content.append(str(node))
+        content.append('<br>' * 10)
+
+    content = '<div>{}</div>'.format(''.join(content))
+
+    return fragment_to_text(content)
+
+
 def extract_mk(html):
     soup = BeautifulSoup(html, 'lxml')
 
@@ -358,6 +380,7 @@ def extract_rbc(html):
 
     return fragment_to_text(content)
 
+
 def extract_sport(html):
     soup = BeautifulSoup(html, 'lxml')
 
@@ -374,6 +397,40 @@ def extract_sport(html):
     content = '<div>{}</div>'.format(''.join(content))
 
     return fragment_to_text(content)
+
+
+def extract_woman(html):
+    soup = BeautifulSoup(html, 'lxml')
+
+    for node in soup('div', {'class': 'article-info'}):
+        node.extract()
+
+    content = []
+
+    header = [str(node) for node in soup('h1')]
+    header = '<br><br><br>'.join(header)
+    content.append(header)
+
+    for node in soup('div', {'class': 'article__lead-paragraph'}):
+        content.append(str(node))
+        content.append('<br>' * 10)
+
+    for node in soup('div', {'itemprop': 'articleBody'}):
+        content.append(str(node))
+        content.append('<br>' * 10)
+
+    for node in soup('div', {'class': 'container__content-text'}):
+        content.append(str(node))
+        content.append('<br>' * 10)
+
+    for node in soup('div', {'class': 'card__comment'}):
+        content.append(str(node))
+        content.append('<br>' * 10)
+
+    content = '<div>{}</div>'.format(''.join(content))
+
+    return fragment_to_text(content)
+
 
 def extract_zen(html):
     soup = BeautifulSoup(html, 'lxml')
@@ -407,6 +464,28 @@ def extract_otvet(html):
     content.append(header)
 
     for node in soup('div', {'itemprop': 'text'}):
+        content.append(str(node))
+        content.append('<br>' * 10)
+
+    content = '<div>{}</div>'.format(''.join(content))
+
+    return fragment_to_text(content)
+
+
+def extract_pikabu(html):
+    soup = BeautifulSoup(html, 'lxml')
+
+    content = []
+
+    header = [str(node) for node in soup('h1')]
+    header = '<br><br><br>'.join(header)
+    content.append(header)
+
+    for node in soup('div', {'class': 'story__content'}):
+        content.append(str(node))
+        content.append('<br>' * 10)
+
+    for node in soup('div', {'class': 'comment__content'}):
         content.append(str(node))
         content.append('<br>' * 10)
 
@@ -503,8 +582,8 @@ def extract_text(url, html):
     if 'https://www.kommersant.ru/' in url:  # sitemap_6
         return extract_kommersant(html)
 
-    # if 'https://www.kp.ru/' in url:  # sitemap_7
-    #     return extract_kp(html)
+    if 'https://www.kp.ru/' in url:  # sitemap_7
+        return extract_kp(html)
 
     if 'https://www.mk.ru/' in url:  # sitemap_8
         return extract_mk(html)
@@ -515,8 +594,8 @@ def extract_text(url, html):
     if 'https://www.sport-express.ru/' in url:  # sitemap_10
         return extract_sport(html)
 
-    # if 'https://www.woman.ru/' in url:  # sitemap_11
-    #     return extract_woman(html)
+    if 'https://www.woman.ru/' in url:  # sitemap_11
+        return extract_woman(html)
 
     if 'https://zen.yandex.ru/' in url:  # sitemap_12
         return extract_zen(html)
@@ -529,8 +608,8 @@ def extract_text(url, html):
             return ''
         return extract_otvet(html)
 
-    # if 'https://pikabu.ru/' in url:  # sitemap_15
-    #     return extract_pikabu(html)
+    if 'https://pikabu.ru/' in url:  # sitemap_15
+        return extract_pikabu(html)
 
     if 'http://lurkmore.net/' in url:
         return extract_lurk(html)
