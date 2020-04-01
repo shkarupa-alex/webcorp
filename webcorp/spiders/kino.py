@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import scrapy
+from scrapy.exceptions import CloseSpider
 from ..common import hash_row, scraped_links
 
 
@@ -7,7 +8,9 @@ class KinoSpider(scrapy.Spider):  # shows captcha
     custom_settings = {
         'FOLLOW_CANONICAL_LINKS': False,
         'ROBOTSTXT_OBEY': False,
-        'REDIRECT_ENABLED': False,
+        'CONCURRENT_REQUESTS_PER_DOMAIN': 1,
+        'CONCURRENT_REQUESTS_PER_IP': 1,
+        'REDIRECT_ENABLED': True,
     }
     name = 'kino'
     allowed_domains = ['www.kinopoisk.ru']
@@ -15,6 +18,7 @@ class KinoSpider(scrapy.Spider):  # shows captcha
 
     url_template = 'https://www.kinopoisk.ru/film/{}/'
     stop_post = 420454  # 06.03.2020
+    captcha = 0
 
     def __init__(self, *args, **kwargs):
         super(KinoSpider, self).__init__(*args, **kwargs)
@@ -34,8 +38,15 @@ class KinoSpider(scrapy.Spider):  # shows captcha
             self.start_urls.append(url)
 
     def parse(self, response):
-        yield {
-            'hash': hash_row([response.url, response.text]),
-            'url': response.url,
-            'html': response.text
-        }
+        if 'capcha' in response.url or 'captcha' in response.url:
+            self.captcha += 1
+
+            if self.captcha > 10:
+                raise CloseSpider('captcha')
+        else:
+            self.captcha = 0
+            yield {
+                'hash': hash_row([response.url, response.text]),
+                'url': response.url,
+                'html': response.text
+            }

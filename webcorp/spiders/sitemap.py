@@ -10,14 +10,14 @@ class SitemapSpider(scrapy.spiders.SitemapSpider):
     name = 'sitemap'
     sitemap_urls = [
         'https://www.kinopoisk.ru/robots.txt',  # 0 -> kino -> captcha
-        'https://lenta.ru/robots.txt',  # 1
+        'https://lenta.ru/robots.txt',  # 1 done
         'https://roem.ru/robots.txt',  # 2 done
-        'https://ria.ru/robots.txt',  # 3
+        'https://ria.ru/robots.txt',  # 3 done
         'https://vc.ru/robots.txt',  # 4 done
         'https://www.gazeta.ru/robots.txt',  # 5
         'https://www.kommersant.ru/robots.txt',  # 6 -> kommersant
         'https://www.kp.ru/robots.txt',  # 7 -> kp
-        'https://www.mk.ru/robots.txt',  # 8 todo check volg.*
+        'https://www.mk.ru/robots.txt',  # 8 + mkreg
         'https://www.rbc.ru/robots.txt',  # 9
         'https://www.sport-express.ru/robots.txt',  # 10 todo: run with redirects
         'http://www.woman.ru/robots.txt',  # 11 todo: run with redirects

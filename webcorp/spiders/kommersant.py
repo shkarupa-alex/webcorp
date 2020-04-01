@@ -22,13 +22,13 @@ class KommersantSpider(scrapy.Spider):
         scraped_urls = scraped_links(self.name)
         self.logger.info('Found {} scraped pages'.format(len(scraped_urls)))
 
-        # max_id = 1
-        # for url in scraped_urls:
-        #     id = int(url.split('/')[-1])
-        #     max_id = max(max_id, id)
-        #
-        # for p in range(max_id, self.stop_post):
-        for p in range(1, self.stop_post):
+        max_id = 1
+        for url in scraped_urls:
+            id = int(url.split('/')[-1])
+            max_id = max(max_id, id)
+
+        # for p in range(1, self.stop_post):
+        for p in range(max_id, self.stop_post):
             url = self.url_template.format(p)
             if url in scraped_urls:
                 continue

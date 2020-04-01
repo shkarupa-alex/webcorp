@@ -24,13 +24,21 @@ class KpSpider(scrapy.Spider):
         scraped_urls = scraped_links(self.name)
         self.logger.info('Found {} scraped pages'.format(len(scraped_urls)))
 
-        for p in range(1, self.stop_post1):
+        max1, max2 = 1, 1
+        for url in scraped_urls:
+            id = int(url.split('/')[-2])
+            if '/daily/' in url:
+                max1 = max(max1, id)
+            if '/online/' in url:
+                max2 = max(max2, id)
+
+        for p in range(max1, self.stop_post1):
             url = self.url_template1.format(p)
             if url in scraped_urls:
                 continue
             self.start_urls.append(url)
 
-        for p in range(1, self.stop_post2):
+        for p in range(max2, self.stop_post2):
             url = self.url_template2.format(p)
             if url in scraped_urls:
                 continue
