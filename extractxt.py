@@ -358,6 +358,62 @@ def extract_rbc(html):
 
     return fragment_to_text(content)
 
+def extract_sport(html):
+    soup = BeautifulSoup(html, 'lxml')
+
+    content = []
+
+    header = [str(node) for node in soup('h1')]
+    header = '<br><br><br>'.join(header)
+    content.append(header)
+
+    for node in soup('div', {'class': 'article_text'}):
+        content.append(str(node))
+        content.append('<br>' * 10)
+
+    content = '<div>{}</div>'.format(''.join(content))
+
+    return fragment_to_text(content)
+
+def extract_zen(html):
+    soup = BeautifulSoup(html, 'lxml')
+
+    content = []
+
+    header = [str(node) for node in soup('h1')]
+    header = '<br><br><br>'.join(header)
+    content.append(header)
+
+    for node in soup('div', {'itemprop': 'articleBody'}):
+        content.append(str(node))
+        content.append('<br>' * 10)
+
+    for node in soup('div', {'class': 'comment'}):
+        content.append(str(node))
+        content.append('<br>' * 10)
+
+    content = '<div>{}</div>'.format(''.join(content))
+
+    return fragment_to_text(content)
+
+
+def extract_otvet(html):
+    soup = BeautifulSoup(html, 'lxml')
+
+    content = []
+
+    header = [str(node) for node in soup('h1')]
+    header = '<br><br><br>'.join(header)
+    content.append(header)
+
+    for node in soup('div', {'itemprop': 'text'}):
+        content.append(str(node))
+        content.append('<br>' * 10)
+
+    content = '<div>{}</div>'.format(''.join(content))
+
+    return fragment_to_text(content)
+
 
 def extract_lurk(html):
     if 'В базе данных не найдено' in html:
@@ -456,20 +512,27 @@ def extract_text(url, html):
     if 'https://www.rbc.ru/' in url:  # sitemap_9
         return extract_rbc(html)
 
-    # if 'https://www.sport-express.ru/' in url:  # sitemap_10
-    #     return extract_sport(html)
+    if 'https://www.sport-express.ru/' in url:  # sitemap_10
+        return extract_sport(html)
+
     # if 'https://www.woman.ru/' in url:  # sitemap_11
     #     return extract_woman(html)
-    # if 'https://zen.yandex.ru/' in url:  # sitemap_12
-    #     return extract_zen(html)
+
+    if 'https://zen.yandex.ru/' in url:  # sitemap_12
+        return extract_zen(html)
+
     # if 'https://irecommend.ru/' in url:  # sitemap_13
     #     return extract_irec(html)
-    # if 'https://otvet.mail.ru/' in url:  # sitemap_14
-    #     return extract_otvet(html)
+
+    if 'https://otvet.mail.ru/' in url:  # sitemap_14
+        if '/question/' not in url:
+            return ''
+        return extract_otvet(html)
+
     # if 'https://pikabu.ru/' in url:  # sitemap_15
     #     return extract_pikabu(html)
 
-    if 'http://lurkmore.net/' in url:  # sitemap_6
+    if 'http://lurkmore.net/' in url:
         return extract_lurk(html)
 
     return extract_article(html)
