@@ -7,10 +7,23 @@ class KpSpider(scrapy.Spider):
     custom_settings = {
         'FOLLOW_CANONICAL_LINKS': False,
         'ROBOTSTXT_OBEY': False,
-        'REDIRECT_ENABLED': False,
+        'REDIRECT_ENABLED': True,
     }
     name = 'kp'
-    allowed_domains = ['www.kp.ru']
+    allowed_domains = [
+        'www.alt.kp.ru', 'www.amur.kp.ru', 'www.astrakhan.kp.ru', 'www.bel.kp.ru', 'www.bryansk.kp.ru',
+        'www.chel.kp.ru', 'www.chita.kp.ru', 'www.chukotka.kp.ru', 'www.crimea.kp.ru', 'www.cyprus.kp.ru',
+        'www.donetsk.kp.ru', 'www.dv.kp.ru', 'www.eao.kp.ru', 'www.hab.kp.ru', 'www.irk.kp.ru', 'www.izh.kp.ru',
+        'www.kaliningrad.kp.ru', 'www.kaluga.kp.ru', 'www.kamchatka.kp.ru', 'www.kazan.kp.ru', 'www.kem.kp.ru',
+        'www.kirov.kp.ru', 'www.komi.kp.ru', 'www.kp.ru', 'www.krsk.kp.ru', 'www.kuban.kp.ru', 'www.kursk.kp.ru',
+        'www.lipetsk.kp.ru', 'www.magadan.kp.ru', 'www.msk.kp.ru', 'www.murmansk.kp.ru', 'www.nnov.kp.ru',
+        'www.nsk.kp.ru', 'www.omsk.kp.ru', 'www.orel.kp.ru', 'www.penza.kp.ru', 'www.perm.kp.ru', 'www.pskov.kp.ru',
+        'www.rostov.kp.ru', 'www.ryazan.kp.ru', 'www.sakhalin.kp.ru', 'www.samara.kp.ru', 'www.saratov.kp.ru',
+        'www.sevastopol.kp.ru', 'www.smol.kp.ru', 'www.spb.kp.ru', 'www.stav.kp.ru', 'www.tambov.kp.ru',
+        'www.tomsk.kp.ru', 'www.tula.kp.ru', 'www.tumen.kp.ru', 'www.tver.kp.ru', 'www.ufa.kp.ru', 'www.ugra.kp.ru',
+        'www.ul.kp.ru', 'www.ulan.kp.ru', 'www.ural.kp.ru', 'www.vladimir.kp.ru', 'www.volgograd.kp.ru',
+        'www.vologda.kp.ru', 'www.vrn.kp.ru', 'www.yakutia.kp.ru', 'www.yamal.kp.ru', 'www.yar.kp.ru'
+    ]
     start_urls = []
 
     url_template1 = 'https://www.kp.ru/daily/0/{}/'
