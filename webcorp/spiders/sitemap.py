@@ -14,17 +14,17 @@ class SitemapSpider(scrapy.spiders.SitemapSpider):
         'https://roem.ru/robots.txt',  # 2 done
         'https://ria.ru/robots.txt',  # 3 done
         'https://vc.ru/robots.txt',  # 4 done
-        'https://www.gazeta.ru/robots.txt',  # 5
-        'https://www.kommersant.ru/robots.txt',  # 6 -> kommersant
+        'https://www.gazeta.ru/robots.txt',  # 5 done
+        'https://www.kommersant.ru/robots.txt',  # 6 (kommersant) done
         'https://www.kp.ru/robots.txt',  # 7 -> kp
-        'https://www.mk.ru/robots.txt',  # 8 + mkreg
-        'https://www.rbc.ru/robots.txt',  # 9
-        'https://www.sport-express.ru/robots.txt',  # 10 todo: run with redirects
-        'http://www.woman.ru/robots.txt',  # 11 todo: run with redirects
+        'https://www.mk.ru/robots.txt',  # 8 (+ mkreg) done
+        'https://www.rbc.ru/robots.txt',  # 9 done
+        'https://www.sport-express.ru/robots.txt',  # 10 (redirect) done
+        'http://www.woman.ru/robots.txt',  # 11 (redirect)
         'https://zen.yandex.ru/robots.txt',  # 12
         'https://irecommend.ru/robots.txt',  # 13 todo: slowdown
         'https://otvet.mail.ru/robots.txt',  # 14
-        'https://pikabu.ru/robots.txt',  # 15 comments todo: run with redirects
+        'https://pikabu.ru/robots.txt',  # 15 (redirect)
     ]
 
     scraped_urls = set()

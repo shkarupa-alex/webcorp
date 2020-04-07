@@ -193,6 +193,28 @@ def extract_habr(html):
 #     return fragment_to_text(content)
 
 
+def extract_mkreg(html):
+    soup = BeautifulSoup(html, 'lxml')
+
+    content = []
+
+    header = [str(node) for node in soup('h1')]
+    header = '<br><br><br>'.join(header)
+    content.append(header)
+
+    for node in soup('div', {'itemprop': 'description'}):
+        content.append(str(node))
+        content.append('<br>' * 10)
+
+    for node in soup('div', {'itemprop': 'articleBody'}):
+        content.append(str(node))
+        content.append('<br>' * 10)
+
+    content = '<div>{}</div>'.format(''.join(content))
+
+    return fragment_to_text(content)
+
+
 def extract_lenta(html):
     soup = BeautifulSoup(html, 'lxml')
 
@@ -573,6 +595,10 @@ def extract_text(url, html):
 
     # if 'https://www.kinopoisk.ru/' in url:  # sitemap_0
     #     return extract_kino(html)
+
+    if 'https://www.mk.ru/' not in url \
+        and ('.mk.ru/' in url or 'www.mk-' in url):
+        return extract_mkreg(html)
 
     if 'https://lenta.ru/' in url:  # sitemap_1
         return extract_lenta(html)
