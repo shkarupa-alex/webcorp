@@ -36,7 +36,7 @@ class SitemapSpider(scrapy.spiders.SitemapSpider):
         else:
             self.sitemap_urls = self.sitemap_urls[id: id + 1]
 
-        self.scraped_urls = scraped_links('{}_{}'.format(self.name, id))
+        self.scraped_urls = scraped_links('{}_{}'.format('sitemap', id))  # not sitemapr
         self.logger.info('Already scraped {} urls'.format(len(self.scraped_urls)))
 
         super(SitemapSpider, self).__init__(*args, **kwargs)
