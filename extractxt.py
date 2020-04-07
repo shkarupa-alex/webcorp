@@ -2,7 +2,9 @@
 import argparse
 import csv
 import gzip
+import json
 import hashlib
+import re
 import sys
 from bs4 import BeautifulSoup
 from bs4.element import NavigableString
@@ -191,6 +193,72 @@ def extract_habr(html):
 #     content = '<div>{}</div>'.format(''.join(content))
 #
 #     return fragment_to_text(content)
+
+def extract_lj(html):
+    comments = []
+    try:
+        meta_text = re.findall(r'\sSite\.page = (\{")([\s\S]+?)(\});\s+Site', html)
+        if len(meta_text) == 1 and len(meta_text[0]) == 3:
+            meta_dict = json.loads(''.join(meta_text[0]))
+            if 'comments' in meta_dict:
+                for c in meta_dict['comments']:
+                    if 'uname' not in c or 'bot' in c['uname']:
+                        continue
+                    if 'article' not in c or not c['article']:
+                        continue
+                    comments.append(c['article'])
+    except Exception as e:
+        print(e)
+
+    if len(comments):
+        comments = '<br><br><br>'.join(comments)
+        comments = fragment_to_text(comments)
+    else:
+        comments = ''
+
+    return extract_article(html) + '\n\n\n' + comments
+
+
+def extract_lurk(html):
+    if 'В базе данных не найдено' in html:
+        return ''
+
+    soup = BeautifulSoup(html, 'lxml')
+
+    for node in soup('table', {'class': 'lm-plashka'}):
+        node.extract()
+    for node in soup('table', {'id': 'toc'}):
+        node.extract()
+    for node in soup('div', {'class': 'buttons-line'}):
+        node.extract()
+    for node in soup('div', {'class': 'noprint'}):
+        node.extract()
+    for node in soup(None, {'class': 'mw-collapsible'}):
+        node.extract()
+
+    content = []
+
+    header = [str(node) for node in soup('h1')]
+
+    header = '<br><br><br>'.join(header)
+    content.append(header)
+
+    for bad_title in [
+        'User:', 'Mediawiki:', 'Special:', 'Lurkmore:', 'Участник:', 'Служебная:', 'Обсуждение:', 'Категория:',
+        'Портал:', 'Обсуждение портала:', 'Шаблон:', 'Обсуждение участника:', 'Файл:', 'Обсуждение категории:',
+        'Обсуждение шаблона:', 'Обсуждение копипасты:', 'Обсуждение смехуечков:', 'Обсуждение файла:',
+        'Смехуечки:', 'Обсуждение MediaWiki:'
+    ]:
+        if bad_title in header:
+            return ''
+
+    for node in soup('div', {'id': 'mw-content-text'}):
+        content.append(str(node))
+        content.append('<br>' * 10)
+
+    content = '<div>{}</div>'.format(''.join(content))
+
+    return fragment_to_text(content)
 
 
 def extract_mkreg(html):
@@ -526,48 +594,6 @@ def extract_pikabu(html):
     return fragment_to_text(content)
 
 
-def extract_lurk(html):
-    if 'В базе данных не найдено' in html:
-        return ''
-
-    soup = BeautifulSoup(html, 'lxml')
-
-    for node in soup('table', {'class': 'lm-plashka'}):
-        node.extract()
-    for node in soup('table', {'id': 'toc'}):
-        node.extract()
-    for node in soup('div', {'class': 'buttons-line'}):
-        node.extract()
-    for node in soup('div', {'class': 'noprint'}):
-        node.extract()
-    for node in soup(None, {'class': 'mw-collapsible'}):
-        node.extract()
-
-    content = []
-
-    header = [str(node) for node in soup('h1')]
-
-    header = '<br><br><br>'.join(header)
-    content.append(header)
-
-    for bad_title in [
-        'User:', 'Mediawiki:', 'Special:', 'Lurkmore:', 'Участник:', 'Служебная:', 'Обсуждение:', 'Категория:',
-        'Портал:', 'Обсуждение портала:', 'Шаблон:', 'Обсуждение участника:', 'Файл:', 'Обсуждение категории:',
-        'Обсуждение шаблона:', 'Обсуждение копипасты:', 'Обсуждение смехуечков:', 'Обсуждение файла:',
-        'Смехуечки:', 'Обсуждение MediaWiki:'
-    ]:
-        if bad_title in header:
-            return ''
-
-    for node in soup('div', {'id': 'mw-content-text'}):
-        content.append(str(node))
-        content.append('<br>' * 10)
-
-    content = '<div>{}</div>'.format(''.join(content))
-
-    return fragment_to_text(content)
-
-
 def extract_article(html):
     if not len(html.strip()):
         return ''
@@ -596,8 +622,14 @@ def extract_text(url, html):
     # if 'https://www.kinopoisk.ru/' in url:  # sitemap_0
     #     return extract_kino(html)
 
+    if '<meta property="twitter:site" content="@livejournal" />' in html:
+        return extract_lj(html)
+
+    if 'http://lurkmore.net/' in url:
+        return extract_lurk(html)
+
     if 'https://www.mk.ru/' not in url \
-        and ('.mk.ru/' in url or 'www.mk-' in url):
+            and ('.mk.ru/' in url or 'www.mk-' in url):
         return extract_mkreg(html)
 
     if 'https://lenta.ru/' in url:  # sitemap_1
@@ -646,9 +678,6 @@ def extract_text(url, html):
 
     if 'https://pikabu.ru/' in url:  # sitemap_15
         return extract_pikabu(html)
-
-    if 'http://lurkmore.net/' in url:
-        return extract_lurk(html)
 
     return extract_article(html)
 
