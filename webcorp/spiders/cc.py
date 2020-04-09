@@ -50,7 +50,7 @@ class CcSpider(scrapy.Spider):
             break
 
         self.allowed_domains = list(allowed_domains)
-        self.logger.info('Found {} users'.format(len(self.start_urls)))
+        self.logger.info('Will skip {} lines'.format(len(self.skip_lines)))
 
     def start_requests(self):
         storage_paths = get_project_settings().get('DEFAULT_EXPORT_STORAGES', [])
