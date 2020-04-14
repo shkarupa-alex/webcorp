@@ -45,6 +45,8 @@ class KpSpider(scrapy.Spider):
             if '/online/' in url:
                 max2 = max(max2, id)
 
+        max1 = max(max1, 1365318)
+
         for p in range(max1, self.stop_post1):
             url = self.url_template1.format(p)
             if url in scraped_urls:
