@@ -41,6 +41,14 @@ class SitemapSpider(scrapy.spiders.SitemapSpider):
 
         super(SitemapSpider, self).__init__(*args, **kwargs)
 
+    def sitemap_filter(self, entries):
+        for entry in entries:
+            if 'loc' in entry:
+                if '/tag/' in entry['loc'] or \
+                        'otvet.mail.ru' in entry['loc'] and '/answer/' in entry['loc']:
+                    continue
+            yield entry
+
     def parse(self, response):
         # comments_roem = response.xpath('//*[contains(@class, "comment-body")]/p')
         # comments_vc = response.xpath('//*[contains(@class, "comments__item__text")]/p')

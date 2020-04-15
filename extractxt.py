@@ -6,6 +6,7 @@ import json
 import hashlib
 import re
 import sys
+import traceback
 from bs4 import BeautifulSoup
 from bs4.element import NavigableString
 from nlpclean.html import html_to_article, fragment_to_text
@@ -46,6 +47,7 @@ class Worker(Process):
                     })
 
             except Exception as e:
+                traceback.print_exc()
                 print(e)
 
             self.src.task_done()
@@ -109,6 +111,7 @@ class Writer(Process):
                     })
 
             except Exception as e:
+                traceback.print_exc()
                 print('Error: {}'.format(e))
 
             self.trg.task_done()
@@ -547,6 +550,28 @@ def extract_zen(html):
     return fragment_to_text(content)
 
 
+def extract_irec(html):
+    soup = BeautifulSoup(html, 'lxml')
+
+    content = []
+
+    header = [str(node) for node in soup('h2', {'class': 'reviewTitle'})]
+    header = '<br><br><br>'.join(header)
+    content.append(header)
+
+    for node in soup('div', {'itemprop': 'reviewBody'}):
+        content.append(str(node))
+        content.append('<br>' * 10)
+
+    for node in soup('div', {'class': 'cmntreply-text'}):
+        content.append(str(node))
+        content.append('<br>' * 10)
+
+    content = '<div>{}</div>'.format(''.join(content))
+
+    return fragment_to_text(content)
+
+
 def extract_otvet(html):
     soup = BeautifulSoup(html, 'lxml')
 
@@ -668,8 +693,8 @@ def extract_text(url, html):
     if 'https://zen.yandex.ru/' in url:  # sitemap_12
         return extract_zen(html)
 
-    # if 'https://irecommend.ru/' in url:  # sitemap_13
-    #     return extract_irec(html)
+    if 'https://irecommend.ru/' in url:  # sitemap_13
+        return extract_irec(html)
 
     if 'https://otvet.mail.ru/' in url:  # sitemap_14
         if '/question/' not in url:
