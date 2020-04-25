@@ -45,7 +45,8 @@ class SitemapSpider(scrapy.spiders.SitemapSpider):
         for entry in entries:
             if 'loc' in entry:
                 if '/tag/' in entry['loc'] or \
-                        'otvet.mail.ru' in entry['loc'] and '/answer/' in entry['loc']:
+                        'otvet.mail.ru' in entry['loc'] and '/answer/' in entry['loc'] or \
+                        'pikabu.ru' in entry['loc'] and '/story/' not in entry['loc']:
                     continue
             yield entry
 

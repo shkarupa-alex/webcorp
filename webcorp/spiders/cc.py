@@ -50,7 +50,7 @@ class CcSpider(scrapy.Spider):
             break
 
         self.allowed_domains = list(allowed_domains)
-        self.logger.info('Will skip {} lines'.format(len(self.skip_lines)))
+        self.logger.info('Will skip {} lines'.format(self.skip_lines))
 
     def start_requests(self):
         storage_paths = get_project_settings().get('DEFAULT_EXPORT_STORAGES', [])
@@ -76,3 +76,9 @@ class CcSpider(scrapy.Spider):
             'url': response.url,
             'html': response.text
         }
+
+    def response_is_ban(self, request, response):
+        return False
+
+    def exception_is_ban(self, request, exception):
+        return None
