@@ -41,15 +41,16 @@ class FSitemapSpider(scrapy.Spider):
             self.logger.warning('Not found links to scrape')
             return
 
-        with open(self.fs_links, 'rt') as f:
-            line = 0
-            for row in f:
-                line += 1
-                row = row.strip()
-                if not len(row):
-                    continue
-                if row in scraped_urls:
-                    self.skip_lines = line
+        if len(scraped_urls):
+            with open(self.fs_links, 'rt') as f:
+                line = 0
+                for row in f:
+                    line += 1
+                    row = row.strip()
+                    if not len(row):
+                        continue
+                    if row in scraped_urls:
+                        self.skip_lines = line
 
         del scraped_urls
 
