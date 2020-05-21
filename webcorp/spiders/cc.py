@@ -61,7 +61,9 @@ class CcSpider(scrapy.Spider):
             if not os.path.exists(feed):
                 continue
             with open(feed, 'rt', newline='') as f:
-                for i, row in enumerate(f.read().split('\n')):
+                i = 0
+                for row in f:
+                    i += 1
                     if i < self.skip_lines:
                         continue
                     row = row.strip()

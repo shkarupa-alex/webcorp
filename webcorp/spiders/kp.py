@@ -28,8 +28,8 @@ class KpSpider(scrapy.Spider):
 
     url_template1 = 'https://www.kp.ru/daily/0/{}/'
     url_template2 = 'https://www.kp.ru/online/news/{}/'
-    stop_post1 = 4176148  # 11.03.2020
-    stop_post2 = 3792228  # 11.03.2020
+    stop_post1 = 4218836  # 18.05.2020
+    stop_post2 = 3874870  # 18.05.2020
 
     def __init__(self, *args, **kwargs):
         super(KpSpider, self).__init__(*args, **kwargs)
@@ -45,19 +45,17 @@ class KpSpider(scrapy.Spider):
             if '/online/' in url:
                 max2 = max(max2, id)
 
-        max1 = max(max1, 2600000)
-
         for p in range(max1, self.stop_post1):
             url = self.url_template1.format(p)
             if url in scraped_urls:
                 continue
             self.start_urls.append(url)
 
-        # for p in range(max2, self.stop_post2):
-        #     url = self.url_template2.format(p)
-        #     if url in scraped_urls:
-        #         continue
-        #     self.start_urls.append(url)
+        for p in range(max2, self.stop_post2):
+            url = self.url_template2.format(p)
+            if url in scraped_urls:
+                continue
+            self.start_urls.append(url)
 
     def parse(self, response):
         yield {
