@@ -6,6 +6,7 @@ import json
 import hashlib
 import re
 import sys
+import time
 import traceback
 from bs4 import BeautifulSoup
 from bs4.element import NavigableString
@@ -749,6 +750,7 @@ if __name__ == "__main__":
     workers = _restart_workers(argv.workers, [], sources, targets)
     writer = Writer(src_name, targets)
     writer.start()
+    timestamp = time.time()
 
     progress = 0
     try:
@@ -770,9 +772,11 @@ if __name__ == "__main__":
                     if progress % 10000 == 0:
                         print('Processed {}0K files'.format(progress // 10000))
 
-                    if progress % 100000 == 0:
+                    elapsed = time.time() - timestamp
+                    if progress % 100000 == 0 or elapsed > 60 * 30:
                         print('Restarting workers')
                         workers = _restart_workers(argv.workers, workers, sources, targets)
+                        timestamp = time.time()
 
             except csv.Error as e:
                 print(e)
