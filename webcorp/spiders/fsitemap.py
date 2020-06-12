@@ -27,6 +27,11 @@ class FSitemapSpider(scrapy.Spider):
         scraped_urls = scraped_links('sitemap_{}'.format(id))
         self.logger.info('Found {} scraped pages'.format(len(scraped_urls)))
 
+        if 12 == id:
+            scraped_urls_ = set('https://zen.yandex.ru/' + '/'.join(link.replace('https://zen.yandex.ru/', '').split('/')[:-1] + link.split('-')[-1:]) for link in scraped_urls)
+        else:
+            scraped_urls_ = set()
+
         storage_paths = get_project_settings().get('DEFAULT_EXPORT_STORAGES', [])
         for storage in storage_paths:
             if not os.path.exists(storage):
@@ -49,7 +54,7 @@ class FSitemapSpider(scrapy.Spider):
                     row = row.strip()
                     if not len(row):
                         continue
-                    if row in scraped_urls:
+                    if row in scraped_urls or row in scraped_urls_:
                         self.skip_lines = line
 
         del scraped_urls
