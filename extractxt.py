@@ -13,6 +13,8 @@ from bs4.element import NavigableString
 from nlpclean.html import html_to_article, fragment_to_text
 from multiprocessing import JoinableQueue, Process
 
+# cat ask.csv | tr ' ' '\n' | grep 'iterator=' | grep "older=" > ask_more.txt
+
 
 class Worker(Process):
     def __init__(self, source_queue, target_queue, *args, **kwargs):
@@ -574,21 +576,24 @@ def extract_irec(html):
 
 
 def extract_otvet(html):
-    soup = BeautifulSoup(html, 'lxml')
+    if '</head>' in html and '</body>' in html:
+        soup = BeautifulSoup(html, 'lxml')
 
-    content = []
+        content = []
 
-    header = [str(node) for node in soup('h1')]
-    header = '<br><br><br>'.join(header)
-    content.append(header)
+        header = [str(node) for node in soup('h1')]
+        header = '<br><br><br>'.join(header)
+        content.append(header)
 
-    for node in soup('div', {'itemprop': 'text'}):
-        content.append(str(node))
-        content.append('<br>' * 10)
+        for node in soup('div', {'itemprop': 'text'}):
+            content.append(str(node))
+            content.append('<br>' * 10)
 
-    content = '<div>{}</div>'.format(''.join(content))
+        content = '<div>{}</div>'.format(''.join(content))
 
-    return fragment_to_text(content)
+        return fragment_to_text(content)
+    else:
+        return html
 
 
 def extract_pikabu(html):
@@ -612,6 +617,27 @@ def extract_pikabu(html):
         content.append('<br>' * 10)
 
     for node in soup('div', {'class': 'comment__content'}):
+        content.append(str(node))
+        content.append('<br>' * 10)
+
+    content = '<div>{}</div>'.format(''.join(content))
+
+    return fragment_to_text(content)
+
+
+def extract_ask(html):
+    soup = BeautifulSoup(html, 'lxml')
+
+    for node in soup('p', {'class': 'readMore'}):
+        node.extract()
+
+    content = []
+
+    for node in soup('header', {'class': 'streamItem_header'}):
+        content.append(str(node))
+        content.append('<br>' * 10)
+
+    for node in soup('div', {'class': 'streamItem_content'}):
         content.append(str(node))
         content.append('<br>' * 10)
 
@@ -704,6 +730,9 @@ def extract_text(url, html):
 
     if 'https://pikabu.ru/' in url:  # sitemap_15
         return extract_pikabu(html)
+
+    if 'https://ask.fm/' in url:
+        return extract_ask(html)
 
     return extract_article(html)
 
