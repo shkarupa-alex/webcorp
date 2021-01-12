@@ -1,42 +1,34 @@
 # -*- coding: utf-8 -*-
+import json
 import os
 import scrapy
 from scrapy.utils.project import get_project_settings
 from ..common import hash_row, scraped_links
 
 
-class FSitemapSpider(scrapy.Spider):
-    custom_settings = {
-        'REDIRECT_ENABLED': True,
-    }
-    name = 'fsitemap'
-    allowed_domains = ['zen.yandex.ru', 'irecommend.ru', 'otvet.mail.ru', 'pikabu.ru', 'www.banki.ru', 'www.ivi.ru', 'banki.ru', 'ivi.ru', 'www.yaplakal.com']
-    start_urls = []
+class OtvetSpider(scrapy.Spider):
+    name = 'otvet'
+    allowed_domains = ['otvet.mail.ru']
+    start_urls = [
+        # 'https://otvet.mail.ru/'
+    ]
 
+    url_template = 'https://otvet.mail.ru/api/v2/question?qid={}'
     fs_links = None
     skip_lines = 0
 
     def __init__(self, *args, **kwargs):
-        super(FSitemapSpider, self).__init__(*args, **kwargs)
+        super(OtvetSpider, self).__init__(*args, **kwargs)
 
-        id = int(kwargs.pop('urlid', -1))
-        if id < 0:
-            self.logger.warning('Wrong "urlid"')
-            return
-
-        scraped_urls = scraped_links('sitemap_{}'.format(id))
+        scraped_urls = scraped_links(self.name)
         self.logger.info('Found {} scraped pages'.format(len(scraped_urls)))
 
-        if 12 == id:
-            scraped_urls_ = set('https://zen.yandex.ru/' + '/'.join(link.replace('https://zen.yandex.ru/', '').split('/')[:-1] + link.split('-')[-1:]) for link in scraped_urls)
-        else:
-            scraped_urls_ = set()
-
+        scraped_urls_ = set()
         storage_paths = get_project_settings().get('DEFAULT_EXPORT_STORAGES', [])
         for storage in storage_paths:
             if not os.path.exists(storage):
                 continue
-            feed = os.path.join(storage, 'fs_links', 'sitemap_{}.txt'.format(id))
+            feed = os.path.join(storage, 'fs_links', 'sitemap_14.txt'.format(id))
             if not os.path.exists(feed):
                 continue
             self.fs_links = feed
@@ -72,14 +64,42 @@ class FSitemapSpider(scrapy.Spider):
                 if line < self.skip_lines:
                     continue
                 row = row.strip()
-                if not len(row):
+                if not len(row) or '/' not in row:
                     continue
 
-                yield scrapy.Request(row, dont_filter=True)
+                id = int(row.split('/')[-1])
+                if id < 1:
+                    continue
+
+                yield scrapy.Request(self.url_template.format(id), dont_filter=True)
 
     def parse(self, response):
-        yield {
-            'hash': hash_row([response.url, response.text]),
-            'url': response.url,
-            'html': response.text
-        }
+        result = json.loads(response.text)
+
+        if 'qid' in result:
+            qid = result['qid']
+        else:
+            qid = int(response.url.split('=')[-1])
+        url = 'https://otvet.mail.ru/question/{}'.format(qid)
+
+        if 'error' in result:
+            yield {
+                'hash': hash_row([url, '']),
+                'url': url,
+                'html': ''
+            }
+        else:
+            text = result['qtext'] + '\n' + result['qcomment']
+            if 'best' in result:
+                text += '\n\n' + result['best']['atext']
+
+            for a in result['answers']:
+                text += '\n\n' + a['atext']
+            for a in result['comments']:
+                text += '\n\n' + a['cmtext']
+
+            yield {
+                'hash': hash_row([url, text]),
+                'url': url,
+                'html': text
+            }

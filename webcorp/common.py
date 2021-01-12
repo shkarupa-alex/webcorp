@@ -25,7 +25,7 @@ def scraped_links(spider_name):
         if not os.path.exists(storage):
             continue
 
-        for phase in ['', '.link.csv.gz'] + ['.link-{}.csv.gz'.format(i) for i in range(10)]:
+        for phase in ['', '.link.csv.gz'] + ['.link-{}.csv.gz'.format(i) for i in range(50)]:
             feed = os.path.join(storage, '{}.csv.gz{}'.format(spider_name, phase))
             if not os.path.exists(feed):
                 continue

@@ -117,14 +117,17 @@ FEED_FORMAT = 'csv.gz'
 PRODUCTION_EXPORT_STORAGE = os.path.join('/', 'mnt', 'HDD', 'export')
 DEFAULT_EXPORT_STORAGES = [
     PRODUCTION_EXPORT_STORAGE,
-    os.path.join('/', 'mnt', 'HDD', 'export'),
     os.path.join(os.path.dirname(__file__), '..', 'export')
 ]
 
 if os.path.exists(PRODUCTION_EXPORT_STORAGE):
     ROTATING_PROXY_LIST = [
         'http://127.0.0.1:3128',
-        'http://94.130.10.45:3128',
+        # 'http://94.130.10.45:3128', # ivdev
         'http://95.216.99.233:3128',
         'http://95.217.76.210:3128',
+        'http://81.163.24.218:3128',  # iv
     ]
+
+# HTTPCACHE_ENABLED = True
+# HTTPCACHE_DIR = './cache'

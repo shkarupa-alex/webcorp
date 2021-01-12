@@ -8,13 +8,13 @@ class SitemapSSpider(SitemapSpider):
         # 'CONCURRENT_REQUESTS_PER_DOMAIN': 1,
         # 'CONCURRENT_REQUESTS_PER_IP': 1,
         # 'DOWNLOAD_DELAY': 4,
-        'USER_AGENT': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.162 Safari/537.36',
+        'USER_AGENT': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.67 Safari/537.36',
         'COOKIES_ENABLED': True
     }
     name = 'sitemaps'
 
     def start_requests(self):
-        cook = 'ab_var=6; _ga=GA1.2.840399676.1586104856; _gid=GA1.2.74964073.1586104856; _ym_uid=1586104856302145208; _ym_d=1586104856; stats_s_a=M%2B33yNyH65FI4UUiDBaFW4o%2F%2BXLTP747LGyFId0iwBhy9IMakAA1QJfbHwogVwBF6LXBpZgL9Y03VexdG2jtKL3OZwTTsmc%2BqfnC6up%2BT9jcC6vVWrlbmVvA97A6c8rv; ss_uid=15861048534187163; stats_u_a=7PsWe5Iq1pd9avMj9v1UDpCUD%2BnPCmGvcC2UzETJwHk9UzbvmXegiCk1%2BFgXOFotGh551vQNGm2sIiPFYBxRKDdKrOZB0%2BAoU%2BV232tE8hI%3D; _ym_isad=1; v=ed; _ym_visorc_8092381=b; ss_uid=15861048534187163; ss_hid=15273029; statsactivity=4; statstimer=3'
+        cook = 'is_scrollmode=1; pcid=SSbkazvq1v2; grex2=%7B%22reserve_user%22%3Atrue%7D; spua_c6bff6=%5B1%5D; gex1=%7B%22subs%22%3A%22f%22%2C%22thfds%22%3A%22f%22%2C%22frex3%22%3A%22f%22%7D; _ga=GA1.2.1094355687.1602327135; _fbp=fb.1.1602327140962.1416022766; _ym_uid=1585112905679078019; _ym_d=1602327141; __utma=43320484.1094355687.1602327135.1603696206.1603696206.1; __utmc=43320484; __utmz=43320484.1603696206.1.1.utmcsr=pikabu.ru|utmccn=(referral)|utmcmd=referral|utmcct=/; vn_buff=[7628359]; la=1607691271_750_1769_2124__; ulfs=1607691271; pkb_modern=11; k2s7=G-J:E:qZhC; bs=K1; _gid=GA1.2.1116284642.1607691273; _gat_gtag_UA_28292940_1=1; _ym_visorc_174977=b; _ym_isad=1; fps=d009aa30e8de1167ac6429d183c7acc4e8'
         cook = cook.split('; ')
         cook = [c.split('=') for c in cook]
         cook = {c[0]: c[1] for c in cook}
